@@ -45,34 +45,16 @@ class Parser {
         return cur;
     }
 
-    function precord()
+    function safe()
     {
-        var r = [];
-        r.push(pfield());
-        if (peek() == sep) {
-            next();
-            r = r.concat(precord());
-        }
-        return r;
-    }
-
-    function pfield()
-    {
-        var buf = new StringBuf();
         var cur = peek();
-        if (cur == esc) {
-            next();
-            var s = pescstr(buf);
-            var fi = next();
-            if (fi != esc)
-                throw 'Assert: $fi';  // FIXME: replace by rewind
-            return s;
-        } else {
-            return punescstr(buf);
-        }
+        if (cur == sep || cur == esc)
+            return null;
+        next();
+        return cur;
     }
 
-    function pescesc()
+    function escapedEsc()
     {
         var cur = peek();
         var nx = peek(1);
@@ -82,7 +64,7 @@ class Parser {
         return esc;
     }
 
-    function pescsep()
+    function escapedSep()
     {
         var cur = peek();
         if (cur != sep)
@@ -91,49 +73,67 @@ class Parser {
         return sep;
     }
 
-    function pescstr(buf:StringBuf)
+    function escapedString(buf:StringBuf)
     {
-        var x = psafe();
+        var x = safe();
         if (x == null)
-            x = pescesc();
+            x = escapedEsc();
         if (x == null)
-            x = pescsep();
+            x = escapedSep();
         if (x != null) {
             buf.add(x);
-            return pescstr(buf);
+            return escapedString(buf);
         }
         return buf.toString();
     }
 
-    function punescstr(buf:StringBuf)
+    function unescapedString(buf:StringBuf)
     {
-        var x = psafe();
+        var x = safe();
         if (x != null) {
             buf.add(x);
-            return punescstr(buf);
+            return unescapedString(buf);
         }
         return buf.toString();
     }
 
-    function psafe()
+    function field()
     {
+        var buf = new StringBuf();
         var cur = peek();
-        if (cur == sep || cur == esc)
-            return null;
-        next();
-        return cur;
+        if (cur == esc) {
+            next();
+            var s = escapedString(buf);
+            var fi = next();
+            if (fi != esc)
+                throw 'Assert: $fi';  // FIXME: replace by rewind
+            return s;
+        } else {
+            return unescapedString(buf);
+        }
     }
 
-    function run()
+    function record()
+    {
+        var r = [];
+        r.push(field());
+        if (peek() == sep) {
+            next();
+            r = r.concat(record());
+        }
+        return r;
+    }
+
+    function records()
     {
         // FIXME: read the other records
-        return [precord()];
+        return [record()];
     }
 
     public static function parse(str:String, ?sep=",", ?esc="\"")
     {
         var p = new Parser(str, sep, esc);
-        return p.run();
+        return p.records();
     }
 
 }
