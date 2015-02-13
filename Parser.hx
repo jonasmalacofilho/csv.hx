@@ -4,14 +4,23 @@ typedef Field = String;
 typedef Record = Array<Field>;
 
 /*
-    The grammar is:
+    TODO Missing newline handling and multiple records
+
+    The Grammar
  
-    csv              ::=  TODO
-    record           ::=  <> | field | field sep record
-    field            ::=  esc escaped_string esc | unescaped_string
-    escaped_string   ::=  <> | esc esc escaped_string | esc sep escaped_string | safe escaped_string
-    unescaped_string ::=  <> | safe unescaped_string
-    safe             ::=  !esc | !sep
+    Terminals:
+
+        sep                       separator string, usually ","
+        esc                       escape string, usually "\""
+
+    Non-terminals:
+
+        safe                 ::=  !( esc | sep )
+        not_escaped_string   ::=  "" | safe not_escaped_string
+        escaped_string       ::=  "" | esc esc escaped_string | sep escaped_string | safe escaped_string
+        field                ::=  esc escaped_string esc | not_escaped_string
+        record               ::=  "" | field | field sep record
+        csv                  ::=  TODO
 */
 class Parser {
 
@@ -87,12 +96,12 @@ class Parser {
         return buf.toString();
     }
 
-    function unescapedString(buf:StringBuf)
+    function nonEscapedString(buf:StringBuf)
     {
         var x = safe();
         if (x != null) {
             buf.add(x);
-            return unescapedString(buf);
+            return nonEscapedString(buf);
         }
         return buf.toString();
     }
@@ -109,7 +118,7 @@ class Parser {
                 throw 'Assert: $fi';  // FIXME: replace by rewind
             return s;
         } else {
-            return unescapedString(buf);
+            return nonEscapedString(buf);
         }
     }
 

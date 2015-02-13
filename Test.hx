@@ -1,14 +1,32 @@
-import Parser.parse;
+import utest.Assert;
+import utest.Runner;
+import utest.ui.Report;
 
+@:access(Parser)
 class Test {
+    function new() {}
+
+    function parseRecord(s)
+    {
+        var p = new Parser(s, ",", "\"");
+        return p.record().join("|");
+    }
+
+    function testParseRecord()
+    {
+        Assert.same('a|b|c', parseRecord('a,b,c'));
+        Assert.same('a|b|c', parseRecord('"a",b,c'));
+        Assert.same('"a"|b|c', parseRecord('"""a""",b,c'));
+        Assert.same('a,a|b|c', parseRecord('"a,a",b,c'));
+        Assert.same('a","a|b|c', parseRecord('"a"",""a",b,c'));
+    }
 
     static function main()
     {
-        trace("Hello!");
-        trace(parse("a,b,c"));
-        trace(parse('"a",b,c'));
-        trace(parse('"a"",""a",b,c'));
+        var r = new Runner();
+        r.addCase(new Test());
+        Report.create(r);
+        r.run();
     }
-
 }
 
