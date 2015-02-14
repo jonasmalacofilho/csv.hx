@@ -1,5 +1,3 @@
-import haxe.Utf8;
-
 typedef Field = String;
 typedef Record = Array<Field>;
 
@@ -40,11 +38,11 @@ class Parser {
 
     function new(str, sep, esc, eol)
     {
-        if (Utf8.length(sep) != 1)
+        if (strlen(sep) != 1)
             throw 'Separator string "$sep" not allowed, only single char';
-        if (Utf8.length(esc) != 1)
+        if (strlen(esc) != 1)
             throw 'Escape string "$esc" not allowed, only single char';
-        if (Utf8.length(eol) < 1)
+        if (strlen(eol) < 1)
             throw "EOL sequence can't be empty";
         if (StringTools.startsWith(eol, esc))
             throw 'EOL sequence can\'t start with the esc character ($esc)';
@@ -53,8 +51,20 @@ class Parser {
         this.esc = esc;
         this.eol = eol;
         this.str = str;
-        len = Utf8.length(str);
+        len = strlen(str);
         pos = 0;
+    }
+
+    // Used `String.substr` equivalent
+    function substr(str:String, pos:Int, len:Int):String
+    {
+        return str.substr(pos, len);
+    }
+
+    // Used `String.length` equivalent
+    function strlen(str:String):Int
+    {
+        return str.length;
     }
 
     // Peek at the next token
@@ -64,17 +74,17 @@ class Parser {
         var ret = null;
         while (skip-- >= 0) {
             if (ret != null)
-                p += Utf8.length(ret);
+                p += strlen(ret);
 
             if (p >= len) {
                 return null;
             }
 
-            var eolsize = Utf8.length(eol);
-            if (p + eolsize - 1 < len && Utf8.sub(str, p, eolsize) == eol)
+            var eolsize = strlen(eol);
+            if (p + eolsize - 1 < len && substr(str, p, eolsize) == eol)
                 ret = eol;
             else
-                ret = Utf8.sub(str, p, 1);
+                ret = substr(str, p, 1);
         }
         return ret;
     }
@@ -86,7 +96,7 @@ class Parser {
         while (skip-- >= 0) {
             ret = peek();
             if (ret != null)
-                pos += Utf8.length(ret);
+                pos += strlen(ret);
         }
         return ret;
     }
@@ -181,5 +191,10 @@ class Parser {
         return p.records();
     }
 
+    public static function parseUtf8(text:String, ?separator=",", ?escape="\"", ?endOfLine="\n"):Array<Record>
+    {
+        var p = new Utf8Parser(text, separator, escape, endOfLine);
+        return p.records();
+    }
 }
 

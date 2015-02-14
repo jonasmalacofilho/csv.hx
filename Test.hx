@@ -6,20 +6,25 @@ import utest.ui.Report;
 class BaseTest {
     var eol:String;
 
-    function parser(text)
+    function recordString(rec:Array<String>)
     {
-        return new Parser(text, ",", "\"", eol);
+        return "[" + rec.join("|") + "]";
+    }
+
+    function csvString(csv:Array<Array<String>>)
+    {
+        return "{" + csv.map(recordString).join(";") + "}";
     }
 
     function parseRecord(text)
     {
-        return "[" + parser(text).record().join("|") + "]";
+        var p = new Parser(text, ",", "\"", eol);
+        return recordString(p.record());
     }
 
     function parseCsv(text)
     {
-        return "{" + Parser.parse(text, ",", "\"", eol)
-            .map(function (x) return "["+x.join("|")+"]").join(";") + "}";
+        return csvString(Parser.parse(text, ",", "\"", eol));
     }
 
     public function testParseRecord()
@@ -40,12 +45,37 @@ class BaseTest {
     public function testParseCsv()
     {
         // multiple records
-        Assert.same('{[a|b|c];[d|e|f]}', parseCsv('a,b,c${eol}d,e,f'));
+        Assert.equals('{[a|b|c];[d|e|f]}', parseCsv('a,b,c${eol}d,e,f'));
         // empty string
-        Assert.same('{[]}', parseCsv(''));
+        Assert.equals('{[]}', parseCsv(''));
         // single record with/without eol
-        Assert.same('{[a|b|c]}', parseCsv('a,b,c'));
-        Assert.same('{[a|b|c]}', parseCsv('a,b,c${eol}'));
+        Assert.equals('{[a|b|c]}', parseCsv('a,b,c'));
+        Assert.equals('{[a|b|c]}', parseCsv('a,b,c${eol}'));
+    }
+
+    public function testSafeUtf8chars()
+    {
+        Assert.equals('[α|β|γ]', parseRecord('α,β,γ'));  // should still work
+
+        function parseUtf8(text)
+        {
+            var p = new Utf8Parser(text, ",", "\"", eol);
+            return recordString(p.record());
+        }
+        Assert.equals('[α|β|γ]', parseUtf8('α,β,γ'));
+    }
+
+    public function testAnyUtf8chars()
+    {
+        function parseUtf8(text)
+        {
+            var p = new Utf8Parser(text, "➔", "✍", eol);
+            return recordString(p.record());
+        }
+
+        Assert.equals('[a|b|c]', parseUtf8('a➔b➔c'));
+        Assert.equals('[a|b|c]', parseUtf8('✍a✍➔b➔c'));
+        Assert.equals('[α|β|γ]', parseUtf8('α➔β➔γ'));
     }
 }
 
