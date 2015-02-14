@@ -68,48 +68,19 @@ class Parser {
         var cur = peek();
         if (cur == sep || cur == esc || cur == eol)
             return null;
-        next();
-        return cur;
-    }
-
-    function escapedEsc()
-    {
-        var cur = peek();
-        var nx = peek(1);
-        if (cur != esc || nx != esc)
-            return null;
-        next(1);
-        return esc;
-    }
-
-    function escapedSep()
-    {
-        var cur = peek();
-        if (cur != sep)
-            return null;
-        next();
-        return sep;
-    }
-
-    function escapedEol()
-    {
-        var cur = peek();
-        if (cur != eol)
-            return null;
-        next();
-        return eol;
+        return next();
     }
 
     function escaped()
     {
-        var x = safe();
-        if (x == null)
-            x = escapedEsc();
-        if (x == null)
-            x = escapedSep();
-        if (x == null)
-            x = escapedEol();
-        return x;
+        var cur = peek();
+        // It follows from the grammar that the only forbidden result is an isolated escape
+        if (cur == esc) {
+            if (peek(1) != esc)
+                return null;
+            return next(1);
+        }
+        return next();
     }
 
     function escapedString()
