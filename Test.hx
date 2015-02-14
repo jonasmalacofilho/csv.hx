@@ -29,17 +29,17 @@ class BaseTest {
 
     public function testParseRecord()
     {
-        Assert.same('[a|b|c]', parseRecord('a,b,c'));
+        Assert.equals('[a|b|c]', parseRecord('a,b,c'));
         // escaping
-        Assert.same('[a|b|c]', parseRecord('"a",b,c'));
-        Assert.same('["a"|b|c]', parseRecord('"""a""",b,c'));
-        Assert.same('[a"a|b|c]', parseRecord('"a""a",b,c'));  // esc
-        Assert.same('[a,a|b|c]', parseRecord('"a,a",b,c'));  // sep
-        Assert.same('[a${eol}a|b|c]', parseRecord('"a${eol}a",b,c'));  // eol
-        Assert.same('[a",${eol}"a|b|c]', parseRecord('"a"",${eol}""a",b,c'));  // esc, sep & eol
+        Assert.equals('[a|b|c]', parseRecord('"a",b,c'));
+        Assert.equals('["a"|b|c]', parseRecord('"""a""",b,c'));
+        Assert.equals('[a"a|b|c]', parseRecord('"a""a",b,c'));  // esc
+        Assert.equals('[a,a|b|c]', parseRecord('"a,a",b,c'));  // sep
+        Assert.equals('[a${eol}a|b|c]', parseRecord('"a${eol}a",b,c'));  // eol
+        Assert.equals('[a",${eol}"a|b|c]', parseRecord('"a"",${eol}""a",b,c'));  // esc, sep & eol
         // empty fields
-        Assert.same('[||]', parseRecord(',,'));
-        Assert.same('[||]', parseRecord('"","",""'));
+        Assert.equals('[||]', parseRecord(',,'));
+        Assert.equals('[||]', parseRecord('"","",""'));
     }
 
     public function testParseCsv()
