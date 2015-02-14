@@ -10,8 +10,8 @@ typedef Record = Array<Field>;
  
     Terminals:
 
-        sep                       separator string, usually `,`
-        esc                       escape string, usually `"`
+        sep                       separator character, usually `,`
+        esc                       escape character, usually `"`
         eol                       end-on-line sequence, usually `\n` or `\r\n`
 
     Non-terminals:
@@ -40,6 +40,15 @@ class Parser {
 
     function new(str, sep, esc, eol)
     {
+        if (Utf8.length(sep) != 1)
+            throw 'Separator string "$sep" not allowed, only single char';
+        if (Utf8.length(esc) != 1)
+            throw 'Escape string "$esc" not allowed, only single char';
+        if (Utf8.length(eol) < 1)
+            throw "EOL sequence can't be empty";
+        if (StringTools.startsWith(eol, esc))
+            throw 'EOL sequence can\'t start with the esc character ($esc)';
+
         this.sep = sep;
         this.esc = esc;
         this.eol = eol;
@@ -63,12 +72,32 @@ class Parser {
         return cur;
     }
 
+    function rewind(n:Int)
+    {
+        pos -= n;
+    }
+
+    function endOfLine()
+    {
+        for (i in 0...Utf8.length(eol)) {
+            if (peek(i) != Utf8.sub(eol, i, 1))
+                return null;
+        }
+        next(Utf8.length(eol) - 1);
+        return eol;
+    }
+
     function safe()
     {
         var cur = peek();
-        if (cur == sep || cur == esc || cur == eol)
+        if (cur == sep || cur == esc) {
             return null;
-        return next();
+        } else if (endOfLine() != null) {
+            rewind(Utf8.length(eol));
+            return null;
+        } else {
+            return next();
+        }
     }
 
     function escaped()
@@ -135,15 +164,15 @@ class Parser {
     {
         var r = [];
         r.push(record());
-        var n = next();
-        while (n != null) {
-            if (n != eol)
-                throw 'Unexpected "$n" after record';
+        var nl = endOfLine();
+        while (nl != null) {
             if (peek() == null)
                 break;  // don't append an empty record for eol terminating string
             r.push(record());
-            n = next();
+            nl = endOfLine();
         }
+        if (peek() != null)
+            throw 'Unexpected "${peek()}" after record';
         return r;
     }
 
