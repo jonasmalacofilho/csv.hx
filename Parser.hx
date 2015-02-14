@@ -57,24 +57,38 @@ class Parser {
         pos = 0;
     }
 
+    // Peek at the next token
     function peek(?skip=0)
     {
-        if (pos + skip >= len)
-            return null;
+        var p = pos;
+        var ret = null;
+        while (skip-- >= 0) {
+            if (ret != null)
+                p += Utf8.length(ret);
 
-        var eolsize = Utf8.length(eol);
-        if (pos + skip + eolsize - 1 < len && Utf8.sub(str, pos + skip, eolsize) == eol) {
-            return eol;
-        } else
-            return Utf8.sub(str, pos + skip, 1);
+            if (p >= len) {
+                return null;
+            }
+
+            var eolsize = Utf8.length(eol);
+            if (p + eolsize - 1 < len && Utf8.sub(str, p, eolsize) == eol)
+                ret = eol;
+            else
+                ret = Utf8.sub(str, p, 1);
+        }
+        return ret;
     }
 
+    // Pop the next token
     function next(?skip=0)
     {
-        var cur = peek(skip);
-        if (cur != null)
-            pos += skip + Utf8.length(cur);
-        return cur;
+        var ret = null;
+        while (skip-- >= 0) {
+            ret = peek();
+            if (ret != null)
+                pos += Utf8.length(ret);
+        }
+        return ret;
     }
 
     function safe()
