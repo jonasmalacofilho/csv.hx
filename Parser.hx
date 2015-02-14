@@ -12,29 +12,37 @@ typedef Record = Array<Field>;
 
         sep                       separator string, usually `,`
         esc                       escape string, usually `"`
+        eol                       end-on-line sequence, usually `\n` or `\r\n`
 
     Non-terminals:
 
-        safe                 ::=  !( esc | sep )
-        escaped              ::=  safe | esc esc | sep
+        safe                 ::=  !( esc | sep | eol )
+        escaped              ::=  safe | esc esc | sep | eol
         non_escaped_string   ::=  "" | safe non_escaped_string
         escaped_string       ::=  "" | escaped escaped_string
         field                ::=  esc escaped_string esc | non_escaped_string
         record               ::=  field | field sep record
-        csv                  ::=  TODO
+        csv                  ::=  record | record eol csv
+
+    Notes:
+
+        The resulting empty record after a terminating end-of-line sequence in
+        a text is automatically striped.
 */
 class Parser {
 
     var sep:String;
     var esc:String;
+    var eol:String;
     var str:String;
     var len:Int;
     var pos:Int;
 
-    function new(str, sep, esc)
+    function new(str, sep, esc, eol)
     {
         this.sep = sep;
         this.esc = esc;
+        this.eol = eol;
         this.str = str;
         len = Utf8.length(str);
         pos = 0;
@@ -58,7 +66,7 @@ class Parser {
     function safe()
     {
         var cur = peek();
-        if (cur == sep || cur == esc)
+        if (cur == sep || cur == esc || cur == eol)
             return null;
         next();
         return cur;
@@ -83,6 +91,15 @@ class Parser {
         return sep;
     }
 
+    function escapedEol()
+    {
+        var cur = peek();
+        if (cur != eol)
+            return null;
+        next();
+        return eol;
+    }
+
     function escaped()
     {
         var x = safe();
@@ -90,6 +107,8 @@ class Parser {
             x = escapedEsc();
         if (x == null)
             x = escapedSep();
+        if (x == null)
+            x = escapedEol();
         return x;
     }
 
@@ -143,13 +162,23 @@ class Parser {
 
     function records()
     {
-        // FIXME: read the other records
-        return [record()];
+        var r = [];
+        r.push(record());
+        var n = next();
+        while (n != null) {
+            if (n != eol)
+                throw 'Unexpected "$n" after record';
+            if (peek() == null)
+                break;  // don't append an empty record for eol terminating string
+            r.push(record());
+            n = next();
+        }
+        return r;
     }
 
-    public static function parse(str:String, ?sep=",", ?esc="\"")
+    public static function parse(text:String, ?separator=",", ?escape="\"", ?endOfLine="\n"):Array<Record>
     {
-        var p = new Parser(str, sep, esc);
+        var p = new Parser(text, separator, escape, endOfLine);
         return p.records();
     }
 
