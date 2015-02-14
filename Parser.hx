@@ -61,43 +61,28 @@ class Parser {
     {
         if (pos + skip >= len)
             return null;
-        return Utf8.sub(str, pos + skip, 1);
+
+        var eolsize = Utf8.length(eol);
+        if (pos + skip + eolsize - 1 < len && Utf8.sub(str, pos + skip, eolsize) == eol) {
+            return eol;
+        } else
+            return Utf8.sub(str, pos + skip, 1);
     }
 
     function next(?skip=0)
     {
         var cur = peek(skip);
-        if (peek != null)
-            pos += skip + 1;
+        if (cur != null)
+            pos += skip + Utf8.length(cur);
         return cur;
-    }
-
-    function rewind(n:Int)
-    {
-        pos -= n;
-    }
-
-    function endOfLine()
-    {
-        for (i in 0...Utf8.length(eol)) {
-            if (peek(i) != Utf8.sub(eol, i, 1))
-                return null;
-        }
-        next(Utf8.length(eol) - 1);
-        return eol;
     }
 
     function safe()
     {
         var cur = peek();
-        if (cur == sep || cur == esc) {
+        if (cur == sep || cur == esc || cur == eol)
             return null;
-        } else if (endOfLine() != null) {
-            rewind(Utf8.length(eol));
-            return null;
-        } else {
-            return next();
-        }
+        return next();
     }
 
     function escaped()
@@ -164,12 +149,12 @@ class Parser {
     {
         var r = [];
         r.push(record());
-        var nl = endOfLine();
-        while (nl != null) {
+        var nl = next();
+        while (nl == eol) {
             if (peek() == null)
                 break;  // don't append an empty record for eol terminating string
             r.push(record());
-            nl = endOfLine();
+            nl = next();
         }
         if (peek() != null)
             throw 'Unexpected "${peek()}" after record';
