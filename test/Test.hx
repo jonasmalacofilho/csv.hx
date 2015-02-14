@@ -1,8 +1,9 @@
+import format.csv.rdp.*;
 import utest.Assert;
 import utest.Runner;
 import utest.ui.Report;
 
-@:access(Parser)
+@:access(format.csv.rdp.Parser)
 class BaseTest {
     var eol:String;
 

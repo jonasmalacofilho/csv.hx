@@ -1,10 +1,12 @@
-typedef Field = String;
-typedef Record = Array<Field>;
+package format.csv.rdp;
+
+import format.csv.rdp.Types;
 
 /*
-    TODO Missing newline handling and multiple records
+    A recursive descent parser for CSV strings
 
     The Grammar
+    -----------
  
     Terminals:
 

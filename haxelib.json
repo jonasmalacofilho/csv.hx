@@ -1,0 +1,13 @@
+{
+    "name"         :  "csv-rdp",
+    "url"          :  "https://github.com/jonasmalacofilho/csv-rdp",
+    "license"      :  "BSD",
+    "tags"         :  ["format", "csv", "cross"],
+    "description"  :  "A recursive descent parser for CSV strings",
+    "version"      :  "0.1.0",
+    "classPath"    :  "lib",
+    "releasenote"  :  "Partial support for arbitrary control characters/sequences and Utf8",
+    "contributors" :  ["jonasmalacofilho"],
+    "dependencies" :  []
+}
+

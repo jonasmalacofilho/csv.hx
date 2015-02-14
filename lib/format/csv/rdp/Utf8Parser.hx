@@ -1,3 +1,5 @@
+package format.csv.rdp;
+
 import haxe.Utf8;
 
 class Utf8Parser extends Parser {
