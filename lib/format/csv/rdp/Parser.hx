@@ -69,7 +69,7 @@ class Parser {
         return str.length;
     }
 
-    // Peek at the next token
+    // Peek at the next token: safe | esc | sep | eol
     function peek(?skip=0)
     {
         var p = pos;
@@ -97,8 +97,9 @@ class Parser {
         var ret = null;
         while (skip-- >= 0) {
             ret = peek();
-            if (ret != null)
-                pos += strlen(ret);
+            if (ret == null)
+                return null;
+            pos += strlen(ret);
         }
         return ret;
     }
@@ -177,9 +178,8 @@ class Parser {
         r.push(record());
         var nl = next();
         while (nl == eol) {
-            if (peek() == null)
-                break;  // don't append an empty record for eol terminating string
-            r.push(record());
+            if (peek() != null)
+                r.push(record());  // don't append an empty record for eol terminating string
             nl = next();
         }
         if (peek() != null)
