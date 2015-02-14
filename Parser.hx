@@ -10,16 +10,17 @@ typedef Record = Array<Field>;
  
     Terminals:
 
-        sep                       separator string, usually ","
-        esc                       escape string, usually "\""
+        sep                       separator string, usually `,`
+        esc                       escape string, usually `"`
 
     Non-terminals:
 
         safe                 ::=  !( esc | sep )
-        not_escaped_string   ::=  "" | safe not_escaped_string
-        escaped_string       ::=  "" | esc esc escaped_string | sep escaped_string | safe escaped_string
-        field                ::=  esc escaped_string esc | not_escaped_string
-        record               ::=  "" | field | field sep record
+        escaped              ::=  safe | esc esc | sep
+        non_escaped_string   ::=  "" | safe non_escaped_string
+        escaped_string       ::=  "" | escaped escaped_string
+        field                ::=  esc escaped_string esc | non_escaped_string
+        record               ::=  field | field sep record
         csv                  ::=  TODO
 */
 class Parser {
@@ -82,43 +83,50 @@ class Parser {
         return sep;
     }
 
-    function escapedString(buf:StringBuf)
+    function escaped()
     {
         var x = safe();
         if (x == null)
             x = escapedEsc();
         if (x == null)
             x = escapedSep();
-        if (x != null) {
+        return x;
+    }
+
+    function escapedString()
+    {
+        var buf = new StringBuf();
+        var x = escaped();
+        while (x != null) {
             buf.add(x);
-            return escapedString(buf);
+            x = escaped();
         }
         return buf.toString();
     }
 
-    function nonEscapedString(buf:StringBuf)
+    function nonEscapedString()
     {
+        var buf = new StringBuf();
         var x = safe();
-        if (x != null) {
+        while (x != null) {
             buf.add(x);
-            return nonEscapedString(buf);
+            x = safe();
         }
         return buf.toString();
     }
 
     function field()
     {
-        var buf = new StringBuf();
         var cur = peek();
         if (cur == esc) {
             next();
-            var s = escapedString(buf);
+            var s = escapedString();
             var fi = next();
             if (fi != esc)
-                throw 'Assert: $fi';  // FIXME: replace by rewind
+                throw 'Missing $esc at the end of escaped field ${s.length>15 ? s.substr(0,10)+"[...]" : s}';
             return s;
         } else {
-            return nonEscapedString(buf);
+            return nonEscapedString();
         }
     }
 
@@ -126,9 +134,9 @@ class Parser {
     {
         var r = [];
         r.push(field());
-        if (peek() == sep) {
+        while (peek() == sep) {
             next();
-            r = r.concat(record());
+            r.push(field());
         }
         return r;
     }
