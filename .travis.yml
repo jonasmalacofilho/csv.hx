@@ -1,0 +1,42 @@
+# example travis.yml haxe configuration
+language: c # change this to objective-c to test on a mac machine
+
+env:
+  matrix:
+    # basic tests
+    - TARGET=interp
+    - TARGET=macro
+    # haxe targets
+    - TARGET=neko
+    - TARGET=js TOOLCHAIN=default
+    - TARGET=java
+    - TARGET=cs
+    - TARGET=cpp
+    - TARGET=cpp ARCH=i686
+    - TARGET=python
+    - TARGET=php
+    - TARGET=swf
+    # haxe versions
+    - TARGET=interp HAXE_VER=3.1.3
+    # - TARGET=interp HAXE_VER=3.1.2
+    # - TARGET=interp HAXE_VER=3.1.1
+    - TARGET=interp HAXE_VER=3.1.0
+
+matrix:
+  fast_finish: true
+  allow_failures:
+
+before_install: # clone travis-hx repo
+  - travis_retry git clone --depth=50 --branch=master git://github.com/jonasmalacofilho/travis-hx.git ~/travis-hx
+
+install: # setup the target
+  - ~/travis-hx/setup.sh
+  - haxelib install utest
+
+script:
+  - cd $TRAVIS_BUILD_DIR
+  # build the target. This will call haxe with the HXFLAGS and HXFLAGS_EXTRA environment variables
+  - HXFLAGS="-main Test -cp test -cp lib -lib utest" ~/travis-hx/build.sh
+  # run the tests
+  - ~/travis-hx/runtests.sh $FILENAME # this will set the $FILENAME defined on the environment variable to run the tests
+

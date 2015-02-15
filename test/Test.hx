@@ -1,6 +1,5 @@
 import format.csv.rdp.*;
-import utest.Assert;
-import utest.Runner;
+import utest.*;
 import utest.ui.Report;
 
 @:access(format.csv.rdp.Parser)
@@ -101,7 +100,15 @@ class Test {
         r.addCase(new TestNixEol());
         r.addCase(new TestWindowsEol());
         Report.create(r);
+        
+#if sys
+        var res:TestResult = null;
+        r.onProgress.add(function (o) if (o.done == o.totals) res = o.result);
         r.run();
+        Sys.exit(res.allOk() ? 0 : 1);
+#else
+        r.run();
+#end
     }
 }
 
