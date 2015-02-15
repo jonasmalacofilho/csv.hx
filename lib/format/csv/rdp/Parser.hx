@@ -31,14 +31,15 @@ import format.csv.rdp.Types;
      - Token: null | esc | sep | eol | safe
 */
 class Parser {
-
+    var str:String;
     var sep:String;
     var esc:String;
     var eol:String;
-    var eolsize:Int;
-    var str:String;
-    var len:Int;
+
     var pos:Int;
+    var len:Int;  // cached str size, computed with strlen
+    var eolsize:Int;  // cached eol size, computed with strlen
+    var peekedToken:String;  // cached result of peekToken (only if skik==0)
 
     // Used `String.substr` equivalent or replacement
     function substr(str:String, pos:Int, len:Int):String
@@ -74,26 +75,29 @@ class Parser {
 
     function peekToken(?skip=0)
     {
-        var p = pos, ret = null;
-        while (skip-- >= 0) {
-            if (p >= len)
-                return null;
-
+        var s = skip, p = pos, ret = null;
+        while (s-- >= 0) {
+            if (p >= len) {
+                ret = null;
+                break;
+            }
             ret = substr(str, p, eolsize) == eol ? eol : substr(str, p, 1);
             p += strlen(ret);
         }
+        peekedToken = skip == 0 ? ret : null;
         return ret;
     }
 
-    function nextToken(?skip=0)
+    function nextToken()
     {
-        var ret = null;
-        while (skip-- >= 0) {
+        var ret = peekedToken;
+        if (ret == null)
             ret = peekToken();
-            if (ret == null)
-                return null;
-            pos += strlen(ret);
-        }
+        peekedToken = null;
+
+        if (ret == null)
+            return null;
+        pos += strlen(ret);
         return ret;
     }
 
@@ -112,7 +116,7 @@ class Parser {
         if (cur == esc) {
             if (peekToken(1) != esc)
                 return null;
-            return nextToken(1);
+            nextToken();  // skip the first esc
         }
         return nextToken();
     }
