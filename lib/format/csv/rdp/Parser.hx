@@ -26,17 +26,31 @@ import format.csv.rdp.Types;
 
     Notes:
 
-        The resulting empty record after a terminating end-of-line sequence in
-        a text is automatically striped.
+     - The resulting empty record after a terminating end-of-line sequence in a
+       text is automatically striped.
+     - Token: null | esc | sep | eol | safe
 */
 class Parser {
 
     var sep:String;
     var esc:String;
     var eol:String;
+    var eolsize:Int;
     var str:String;
     var len:Int;
     var pos:Int;
+
+    // Used `String.substr` equivalent or replacement
+    function substr(str:String, pos:Int, len:Int):String
+    {
+        return str.substr(pos, len);
+    }
+
+    // Used `String.length` replacement
+    function strlen(str:String):Int
+    {
+        return str.length;
+    }
 
     function new(str, sep, esc, eol)
     {
@@ -52,51 +66,30 @@ class Parser {
         this.sep = sep;
         this.esc = esc;
         this.eol = eol;
+        this.eolsize = strlen(eol);
         this.str = str;
         len = strlen(str);
         pos = 0;
     }
 
-    // Used `String.substr` equivalent
-    function substr(str:String, pos:Int, len:Int):String
+    function peekToken(?skip=0)
     {
-        return str.substr(pos, len);
-    }
-
-    // Used `String.length` equivalent
-    function strlen(str:String):Int
-    {
-        return str.length;
-    }
-
-    // Peek at the next token: safe | esc | sep | eol
-    function peek(?skip=0)
-    {
-        var p = pos;
-        var ret = null;
+        var p = pos, ret = null;
         while (skip-- >= 0) {
-            if (ret != null)
-                p += strlen(ret);
-
-            if (p >= len) {
+            if (p >= len)
                 return null;
-            }
 
-            var eolsize = strlen(eol);
-            if (p + eolsize - 1 < len && substr(str, p, eolsize) == eol)
-                ret = eol;
-            else
-                ret = substr(str, p, 1);
+            ret = substr(str, p, eolsize) == eol ? eol : substr(str, p, 1);
+            p += strlen(ret);
         }
         return ret;
     }
 
-    // Pop the next token
-    function next(?skip=0)
+    function nextToken(?skip=0)
     {
         var ret = null;
         while (skip-- >= 0) {
-            ret = peek();
+            ret = peekToken();
             if (ret == null)
                 return null;
             pos += strlen(ret);
@@ -106,22 +99,22 @@ class Parser {
 
     function safe()
     {
-        var cur = peek();
+        var cur = peekToken();
         if (cur == sep || cur == esc || cur == eol)
             return null;
-        return next();
+        return nextToken();
     }
 
     function escaped()
     {
-        var cur = peek();
+        var cur = peekToken();
         // It follows from the grammar that the only forbidden result is an isolated escape
         if (cur == esc) {
-            if (peek(1) != esc)
+            if (peekToken(1) != esc)
                 return null;
-            return next(1);
+            return nextToken(1);
         }
-        return next();
+        return nextToken();
     }
 
     function escapedString()
@@ -148,11 +141,11 @@ class Parser {
 
     function field()
     {
-        var cur = peek();
+        var cur = peekToken();
         if (cur == esc) {
-            next();
+            nextToken();
             var s = escapedString();
-            var fi = next();
+            var fi = nextToken();
             if (fi != esc)
                 throw 'Missing $esc at the end of escaped field ${s.length>15 ? s.substr(0,10)+"[...]" : s}';
             return s;
@@ -165,8 +158,8 @@ class Parser {
     {
         var r = [];
         r.push(field());
-        while (peek() == sep) {
-            next();
+        while (peekToken() == sep) {
+            nextToken();
             r.push(field());
         }
         return r;
@@ -176,14 +169,14 @@ class Parser {
     {
         var r = [];
         r.push(record());
-        var nl = next();
+        var nl = nextToken();
         while (nl == eol) {
-            if (peek() != null)
+            if (peekToken() != null)
                 r.push(record());  // don't append an empty record for eol terminating string
-            nl = next();
+            nl = nextToken();
         }
-        if (peek() != null)
-            throw 'Unexpected "${peek()}" after record';
+        if (peekToken() != null)
+            throw 'Unexpected "${peekToken()}" after record';
         return r;
     }
 
