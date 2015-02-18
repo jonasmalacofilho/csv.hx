@@ -55,14 +55,19 @@ class BaseTest {
 
     public function testSafeUtf8chars()
     {
-        Assert.equals('[α|β|γ]', parseRecord('α,β,γ'));  // should still work
-
         function parseUtf8(text)
         {
             var p = new Utf8Parser(text, ",", "\"", eol);
             return recordString(p.record());
         }
         Assert.equals('[α|β|γ]', parseUtf8('α,β,γ'));
+        
+        // regular parseRecord should still work on some targets for strings
+        // without Utf8 encoded control characters/sequences
+#if (interp || macro || neko || php || cpp)
+        Assert.equals('[α|β|γ]', parseRecord('α,β,γ'));
+#end
+
     }
 
     public function testAnyUtf8chars()
