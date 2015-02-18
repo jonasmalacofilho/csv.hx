@@ -1,6 +1,7 @@
 package format.csv.rdp;
 
 import format.csv.rdp.Types;
+import haxe.io.*;
 
 /*
     A recursive descent parser for CSV strings
@@ -31,44 +32,71 @@ import format.csv.rdp.Types;
      - Token: null | esc | sep | eol | safe
 */
 class Parser {
-    var str:String;
+    var inp:Input;
+
     var sep:String;
     var esc:String;
     var eol:String;
 
     var pos:Int;
-    var eolsize:Int;  // cached eol size, computed with strlen
+    var eolsize:Int;  // cached eol size, computed with stringLength
+    var buffer:String;
+    var bufferOffset:Int;
     var tokenCache:List<{ token:String, pos:Int }>;  // cached results of peekToken
 
-    // Used `String.substr` equivalent or replacement
-    function substr(str:String, pos:Int, len:Int):String
+    function readMore(n:Int)
     {
-        return str.substr(pos, len);
+        try {
+            var bytes = Bytes.alloc(n);
+            var got = inp.readBytes(bytes, 0, n);
+            return bytes.getString(0, got);
+        } catch (e:Eof) {
+            return null;
+        }
+    }
+
+    function read(p:Int, len:Int):String
+    {
+        var bpos = p - bufferOffset;
+        if (bpos + len > stringLength(buffer)) {
+            var more = readMore(4);
+            if (more != null) {
+                buffer = buffer.substr(pos - bufferOffset) + more;
+                bufferOffset = pos;
+                bpos = p - bufferOffset;
+            }
+        }
+        var ret = buffer.substr(bpos, len);
+        return ret != "" ? ret : null;
     }
 
     // Used `String.length` replacement
-    function strlen(str:String):Int
+    function stringLength(str:String):Int
     {
         return str.length;
     }
 
     function new(str, sep, esc, eol)
     {
-        if (strlen(sep) != 1)
+        if (stringLength(sep) != 1)
             throw 'Separator string "$sep" not allowed, only single char';
-        if (strlen(esc) != 1)
+        if (stringLength(esc) != 1)
             throw 'Escape string "$esc" not allowed, only single char';
-        if (strlen(eol) < 1)
+        if (stringLength(eol) < 1)
             throw "EOL sequence can't be empty";
         if (StringTools.startsWith(eol, esc))
             throw 'EOL sequence can\'t start with the esc character ($esc)';
 
+        this.inp = new StringInput(str);
+
         this.sep = sep;
         this.esc = esc;
         this.eol = eol;
-        this.eolsize = strlen(eol);
-        this.str = str;
+
         pos = 0;
+        this.eolsize = stringLength(eol);
+        buffer = "";
+        bufferOffset = 0;
         tokenCache = new List();
     }
 
@@ -86,12 +114,10 @@ class Parser {
         }
 
         while (peek-- > 0) {
-            token = substr(str, p, eolsize) == eol ? eol : substr(str, p, 1);
-            if (token == "") {
-                token = null;
+            token = read(p, eolsize) == eol ? eol : read(p, 1);
+            if (token == null)
                 break;
-            }
-            p += strlen(token);
+            p += stringLength(token);
             tokenCache.add({ token : token, pos : p });
         }
         return token;
