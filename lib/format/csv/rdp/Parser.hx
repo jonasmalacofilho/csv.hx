@@ -7,7 +7,7 @@ import format.csv.rdp.Types;
 
     The Grammar
     -----------
- 
+
     Terminals:
 
         sep                       separator character, usually `,`
@@ -37,9 +37,8 @@ class Parser {
     var eol:String;
 
     var pos:Int;
-    var len:Int;  // cached str size, computed with strlen
     var eolsize:Int;  // cached eol size, computed with strlen
-    var peekedToken:String;  // cached result of peekToken (only if skik==0)
+    var tokenCache:List<{ token:String, pos:Int }>;  // cached results of peekToken
 
     // Used `String.substr` equivalent or replacement
     function substr(str:String, pos:Int, len:Int):String
@@ -69,35 +68,41 @@ class Parser {
         this.eol = eol;
         this.eolsize = strlen(eol);
         this.str = str;
-        len = strlen(str);
         pos = 0;
+        tokenCache = new List();
     }
 
     function peekToken(?skip=0)
     {
-        var s = skip, p = pos, ret = null;
-        while (s-- >= 0) {
-            if (p >= len) {
-                ret = null;
+        var peek = skip + 1;
+
+        var token = null, p = pos;
+        for (t in tokenCache) {
+            token = t.token;
+            p = t.pos;
+            peek--;
+            if (peek <= 0)
+                break;
+        }
+
+        while (peek-- > 0) {
+            token = substr(str, p, eolsize) == eol ? eol : substr(str, p, 1);
+            if (token == "") {
+                token = null;
                 break;
             }
-            ret = substr(str, p, eolsize) == eol ? eol : substr(str, p, 1);
-            p += strlen(ret);
+            p += strlen(token);
+            tokenCache.add({ token : token, pos : p });
         }
-        peekedToken = skip == 0 ? ret : null;
-        return ret;
+        return token;
     }
 
     function nextToken()
     {
-        var ret = peekedToken;
-        if (ret == null)
-            ret = peekToken();
-        peekedToken = null;
-
+        var ret = peekToken();
         if (ret == null)
             return null;
-        pos += strlen(ret);
+        pos = tokenCache.pop().pos;
         return ret;
     }
 
