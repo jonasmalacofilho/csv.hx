@@ -44,33 +44,15 @@ class Parser {
     var bufferOffset:Int;
     var tokenCache:List<{ token:String, pos:Int }>;  // cached results of peekToken
 
-    function readMore(n:Int)
+    // Used instead of `String.substr`
+    // (important for Utf8 support in subclass)
+    function substring(str:String, pos:Int, ?len:Null<Int>):String
     {
-        try {
-            var bytes = Bytes.alloc(n);
-            var got = inp.readBytes(bytes, 0, n);
-            return bytes.getString(0, got);
-        } catch (e:Eof) {
-            return null;
-        }
+        return str.substr(pos, len);
     }
 
-    function read(p:Int, len:Int):String
-    {
-        var bpos = p - bufferOffset;
-        if (bpos + len > stringLength(buffer)) {
-            var more = readMore(4);
-            if (more != null) {
-                buffer = buffer.substr(pos - bufferOffset) + more;
-                bufferOffset = pos;
-                bpos = p - bufferOffset;
-            }
-        }
-        var ret = buffer.substr(bpos, len);
-        return ret != "" ? ret : null;
-    }
-
-    // Used `String.length` replacement
+    // Used instead of `String.length`
+    // (important for Utf8 support in subclass)
     function stringLength(str:String):Int
     {
         return str.length;
@@ -98,6 +80,32 @@ class Parser {
         buffer = "";
         bufferOffset = 0;
         tokenCache = new List();
+    }
+
+    function readMore(n:Int)
+    {
+        try {
+            var bytes = Bytes.alloc(n);
+            var got = inp.readBytes(bytes, 0, n);
+            return bytes.getString(0, got);
+        } catch (e:Eof) {
+            return null;
+        }
+    }
+
+    function read(p:Int, len:Int):String
+    {
+        var bpos = p - bufferOffset;
+        if (bpos + len > stringLength(buffer)) {
+            var more = readMore(4);
+            if (more != null) {
+                buffer = substring(buffer, pos - bufferOffset) + more;
+                bufferOffset = pos;
+                bpos = p - bufferOffset;
+            }
+        }
+        var ret = substring(buffer, bpos, len);
+        return ret != "" ? ret : null;
     }
 
     function peekToken(?skip=0)

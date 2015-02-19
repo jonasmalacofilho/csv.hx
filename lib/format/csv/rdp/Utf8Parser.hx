@@ -1,9 +1,21 @@
 package format.csv.rdp;
 
-import haxe.io.*;
 import haxe.Utf8;
+import haxe.io.*;
 
 class Utf8Parser extends Parser {
+    override function substring(str, pos, ?len)
+    {
+        if (len == null)
+            len = Utf8.length(str);
+        return Utf8.sub(str, pos, len);
+    }
+
+    override function stringLength(str):Int
+    {
+        return Utf8.length(str);
+    }
+
     function validUtf8(bytes:Bytes, pos, len)
     {
         // adapted from neko/libs/std/utf8.c@utf8_validate
@@ -54,26 +66,6 @@ class Utf8Parser extends Parser {
         } catch (e:Eof) {
             return null;
         }
-    }
-
-    override function read(p:Int, len:Int):String
-    {
-        var bpos = p - bufferOffset;
-        if (bpos + len > Utf8.length(buffer)) {
-            var more = readMore(4);
-            if (more != null) {
-                buffer = Utf8.sub(buffer, pos - bufferOffset, Utf8.length(buffer)) + more;
-                bufferOffset = pos;
-                bpos = p - bufferOffset;
-            }
-        }
-        var ret = Utf8.sub(buffer, bpos, len);
-        return ret != "" ? ret : null;
-    }
-
-    override function stringLength(str:String):Int
-    {
-        return Utf8.length(str);
     }
 }
 
