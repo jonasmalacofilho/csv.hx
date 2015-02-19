@@ -48,6 +48,9 @@ class Utf8Parser extends Parser {
 
     override function readMore(n:Int)
     {
+        if (inp == null)
+            return null;
+
         try {
             var bytes = Bytes.alloc(n + 4);
             var got = inp.readBytes(bytes, 0, n);

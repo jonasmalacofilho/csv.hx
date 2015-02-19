@@ -18,8 +18,7 @@ class BaseTest {
 
     static function stringParser(text, sep, esc, eol, ?utf8=false)
     {
-        var empty = new EmptyInput();
-        var p = utf8 ? new Utf8Parser(empty, sep, esc, eol) : new Parser(empty, sep, esc, eol);
+        var p = utf8 ? new Utf8Parser(sep, esc, eol, null) : new Parser(sep, esc, eol, null);
         p.buffer = text;
         return p;
     }

@@ -32,11 +32,10 @@ import haxe.io.*;
      - Token: null | esc | sep | eol | safe
 */
 class Parser {
-    var inp:Input;
-
     var sep:String;
     var esc:String;
     var eol:String;
+    var inp:Null<Input>;
 
     var pos:Int;
     var eolsize:Int;  // cached eol size, computed with stringLength
@@ -58,7 +57,7 @@ class Parser {
         return str.length;
     }
 
-    function new(inp, sep, esc, eol)
+    function new(sep, esc, eol, inp)
     {
         if (stringLength(sep) != 1)
             throw 'Separator string "$sep" not allowed, only single char';
@@ -69,21 +68,24 @@ class Parser {
         if (StringTools.startsWith(eol, esc))
             throw 'EOL sequence can\'t start with the esc character ($esc)';
 
-        this.inp = inp;
-
         this.sep = sep;
         this.esc = esc;
         this.eol = eol;
+        this.inp = inp;
 
-        pos = 0;
         this.eolsize = stringLength(eol);
-        buffer = "";
-        bufferOffset = 0;
         tokenCache = new List();
+
+        buffer = "";
+        pos = 0;
+        bufferOffset = 0;
     }
 
     function readMore(n:Int)
     {
+        if (inp == null)
+            return null;
+
         try {
             var bytes = Bytes.alloc(n);
             var got = inp.readBytes(bytes, 0, n);
@@ -225,14 +227,14 @@ class Parser {
 
     public static function parse(text:String, ?separator=",", ?escape="\"", ?endOfLine="\n"):Array<Record>
     {
-        var p = new Parser(new EmptyInput(), separator, escape, endOfLine);
+        var p = new Parser(separator, escape, endOfLine, null);
         p.buffer = text;
         return p.records();
     }
 
     public static function parseUtf8(text:String, ?separator=",", ?escape="\"", ?endOfLine="\n"):Array<Record>
     {
-        var p = new Utf8Parser(new EmptyInput(), separator, escape, endOfLine);
+        var p = new Utf8Parser(separator, escape, endOfLine, null);
         p.buffer = text;
         return p.records();
     }
