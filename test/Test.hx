@@ -16,9 +16,17 @@ class BaseTest {
         return "{" + csv.map(recordString).join(";") + "}";
     }
 
+    static function stringParser(text, sep, esc, eol, ?utf8=false)
+    {
+        var empty = new EmptyInput();
+        var p = utf8 ? new Utf8Parser(empty, sep, esc, eol) : new Parser(empty, sep, esc, eol);
+        p.buffer = text;
+        return p;
+    }
+
     function parseRecord(text)
     {
-        var p = new Parser(text, ",", "\"", eol);
+        var p = stringParser(text, ",", "\"", eol);
         return recordString(p.record());
     }
 
@@ -57,24 +65,19 @@ class BaseTest {
     {
         function parseUtf8(text)
         {
-            var p = new Utf8Parser(text, ",", "\"", eol);
+            var p = stringParser(text, ",", "\"", eol, true);
             return recordString(p.record());
         }
         Assert.equals('[α|β|γ]', parseUtf8('α,β,γ'));
         
-        // regular parseRecord should still work on some targets for strings
-        // without Utf8 encoded control characters/sequences
-#if (interp || macro || neko || php || cpp)
         Assert.equals('[α|β|γ]', parseRecord('α,β,γ'));
-#end
-
     }
 
     public function testAnyUtf8chars()
     {
         function parseUtf8(text)
         {
-            var p = new Utf8Parser(text, "➔", "✍", eol);
+            var p = stringParser(text, "➔", "✍", eol, true);
             return recordString(p.record());
         }
 
@@ -82,6 +85,22 @@ class BaseTest {
         Assert.equals('[a|b|c]', parseUtf8('✍a✍➔b➔c'));
         Assert.equals('[α|β|γ]', parseUtf8('α➔β➔γ'));
     }
+
+#if (js || java || cs || swf)
+    // on targets where String already has unicode support, the Utf8Parser
+    // shouldn't be necessary
+    public function testNativeUnicodeSupport()
+    {
+        function parseUnicode(text)
+        {
+            var p = stringParser(text, "➔", "✍", eol, false);
+            return recordString(p.record());
+        }
+        Assert.equals('[a|b|c]', parseUnicode('a➔b➔c'));
+        Assert.equals('[a|b|c]', parseUnicode('✍a✍➔b➔c'));
+        Assert.equals('[α|β|γ]', parseUnicode('α➔β➔γ'));
+    }
+#end
 }
 
 class TestNixEol extends BaseTest {

@@ -76,7 +76,7 @@ class Parser {
         return str.length;
     }
 
-    function new(str, sep, esc, eol)
+    function new(inp, sep, esc, eol)
     {
         if (stringLength(sep) != 1)
             throw 'Separator string "$sep" not allowed, only single char';
@@ -87,7 +87,7 @@ class Parser {
         if (StringTools.startsWith(eol, esc))
             throw 'EOL sequence can\'t start with the esc character ($esc)';
 
-        this.inp = new StringInput(str);
+        this.inp = inp;
 
         this.sep = sep;
         this.esc = esc;
@@ -217,13 +217,15 @@ class Parser {
 
     public static function parse(text:String, ?separator=",", ?escape="\"", ?endOfLine="\n"):Array<Record>
     {
-        var p = new Parser(text, separator, escape, endOfLine);
+        var p = new Parser(new EmptyInput(), separator, escape, endOfLine);
+        p.buffer = text;
         return p.records();
     }
 
     public static function parseUtf8(text:String, ?separator=",", ?escape="\"", ?endOfLine="\n"):Array<Record>
     {
-        var p = new Utf8Parser(text, separator, escape, endOfLine);
+        var p = new Utf8Parser(new EmptyInput(), separator, escape, endOfLine);
+        p.buffer = text;
         return p.records();
     }
 }
