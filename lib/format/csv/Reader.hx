@@ -188,6 +188,7 @@ class Reader {
         inp = stream;
         pos = 0;
         bufferOffset = 0;
+        tokenCache = new List();
         starting = true;
     }
 
@@ -214,9 +215,7 @@ class Reader {
         sep = separator;
         esc = escape;
         eol = endOfLine;
-
         eolsize = stringLength(eol);
-        tokenCache = new List();
 
         reset(buffer, null);
     }
