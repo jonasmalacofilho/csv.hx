@@ -64,40 +64,28 @@ class BaseTest {
         Assert.same(["α","β","γ"], r(u, 'α➔β➔γ'));
     }
 
-    public function testNormalReadAll()
+    public function testRead()
     {
-        var reader = new Parser(",", "\"", eol);
-        function r(str)
-        {
-            reader.reset(str, null);
-            return reader.readAll();
-        }
+        var n = Parser.parse.bind(_, ",", "\"", eol);
+        var u = Parser.parseUtf8.bind(_, ",", "\"", eol);
 
+        // string/normal reader
         // multiple records
-        Assert.same([["a","b","c"], ["d","e","f"]], r('a,b,c${eol}d,e,f'));
+        Assert.same([["a","b","c"], ["d","e","f"]], n('a,b,c${eol}d,e,f'));
         // empty string
-        Assert.equals([[]].toString(), r('').toString());  // FIXME bug on utest
+        Assert.equals([[]].toString(), n('').toString());  // FIXME bug on utest
         // single record with/without eol
-        Assert.same([["a","b","c"]], r('a,b,c'));
-        Assert.same([["a","b","c"]], r('a,b,c${eol}'));
-    }
+        Assert.same([["a","b","c"]], n('a,b,c'));
+        Assert.same([["a","b","c"]], n('a,b,c${eol}'));
 
-    public function testUtf8ReadAll()
-    {
-        var reader = new Utf8Parser(",", "\"", eol);
-        function r(str)
-        {
-            reader.reset(str, null);
-            return reader.readAll();
-        }
-
+        // utf8 reader
         // multiple records
-        Assert.same([["a","b","c"], ["d","e","f"]], r('a,b,c${eol}d,e,f'));
+        Assert.same([["a","b","c"], ["d","e","f"]], u('a,b,c${eol}d,e,f'));
         // empty string
-        Assert.equals([[]].toString(), r('').toString());  // FIXME bug on utest
+        Assert.equals([[]].toString(), u('').toString());  // FIXME bug on utest
         // single record with/without eol
-        Assert.same([["a","b","c"]], r('a,b,c'));
-        Assert.same([["a","b","c"]], r('a,b,c${eol}'));
+        Assert.same([["a","b","c"]], u('a,b,c'));
+        Assert.same([["a","b","c"]], u('a,b,c${eol}'));
     }
 }
 
