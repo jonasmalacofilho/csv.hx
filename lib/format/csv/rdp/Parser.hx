@@ -65,8 +65,6 @@ class Parser {
             throw 'Escape string "$esc" not allowed, only single char';
         if (stringLength(eol) < 1)
             throw "EOL sequence can't be empty";
-        if (StringTools.startsWith(eol, esc))
-            throw 'EOL sequence can\'t start with the esc character ($esc)';
 
         this.sep = sep;
         this.esc = esc;
