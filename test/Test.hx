@@ -115,6 +115,12 @@ class BaseTest {
         // `starting` flag updates on other public APIs
         r.reset('', null); r.readRecord(); Assert.isFalse(r.hasNext());
         r.reset('', null); r.readAll(); Assert.isFalse(r.hasNext());
+
+        // iterator & iterable usage
+        r.reset('a,b,c${eol}d,e,f', null);
+        Assert.same([["a","b","c"], ["d","e","f"]], [for (record in r) record]);
+        r.reset('a,b,c${eol}d,e,f', null);
+        Assert.same(Lambda.list([["a","b","c"], ["d","e","f"]]), Lambda.list(r));
     }
 }
 
