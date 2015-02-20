@@ -2,7 +2,6 @@ import format.csv.rdp.*;
 import utest.*;
 import utest.ui.Report;
 
-@:access(format.csv.rdp.Parser)
 class BaseTest {
     var eol:String;
 
@@ -18,8 +17,8 @@ class BaseTest {
 
     static function stringParser(text, sep, esc, eol, ?utf8=false)
     {
-        var p = utf8 ? new Utf8Parser(sep, esc, eol, null) : new Parser(sep, esc, eol, null);
-        p.buffer = text;
+        var p = utf8 ? new Utf8Parser(sep, esc, eol) : new Parser(sep, esc, eol);
+        p.reset(text);
         return p;
     }
 

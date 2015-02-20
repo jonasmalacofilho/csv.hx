@@ -57,28 +57,6 @@ class Parser {
         return str.length;
     }
 
-    function new(sep, esc, eol, inp)
-    {
-        if (stringLength(sep) != 1)
-            throw 'Separator string "$sep" not allowed, only single char';
-        if (stringLength(esc) != 1)
-            throw 'Escape string "$esc" not allowed, only single char';
-        if (stringLength(eol) < 1)
-            throw "EOL sequence can't be empty";
-
-        this.sep = sep;
-        this.esc = esc;
-        this.eol = eol;
-        this.inp = inp;
-
-        this.eolsize = stringLength(eol);
-        tokenCache = new List();
-
-        buffer = "";
-        pos = 0;
-        bufferOffset = 0;
-    }
-
     function fetchBytes(n:Int):Null<String>
     {
         if (inp == null)
@@ -197,7 +175,58 @@ class Parser {
         }
     }
 
-    function readRecord()
+    /*
+       Reset the reader with some input data.
+
+       Data can be provided in a string or in a stream.  If both are supplied,
+       the reader will first process the entire string, switching automatically
+       to the stream when there's no new data left on the string.
+    */
+    public function reset(?string:String, ?stream:Input):Void
+    {
+        buffer = string != null ? string : "";
+        inp = stream;
+        pos = 0;
+        bufferOffset = 0;
+    }
+
+    /*
+       Create a new Reader.
+
+       Creates a native String Csv reader.
+
+       Params:
+
+        - `separator`: 1-char separator string
+        - `escape`: 1-char escape (or "quoting") string
+        - `endOfLine`: end-of-line sequence string
+    */
+    public function new(separator:String, escape:String, endOfLine:String)
+    {
+        if (stringLength(separator) != 1)
+            throw 'Separator string "$separator" not allowed, only single char';
+        if (stringLength(escape) != 1)
+            throw 'Escape string "$escape" not allowed, only single char';
+        if (stringLength(endOfLine) < 1)
+            throw "EOL sequence can't be empty";
+
+        sep = separator;
+        esc = escape;
+        eol = endOfLine;
+
+        eolsize = stringLength(eol);
+        tokenCache = new List();
+
+        reset(buffer, null);
+    }
+
+    /*
+       Read and return a single record.
+
+       This will process the input until a separator or an end-of-line is
+       found.
+    */
+    public function readRecord():Record
     {
         var r = [];
         r.push(readField());
@@ -208,7 +237,10 @@ class Parser {
         return r;
     }
 
-    function readAll()
+    /*
+       Read and return all records available.
+    */
+    public function readAll():Csv
     {
         var r = [];
         r.push(readRecord());
@@ -227,7 +259,7 @@ class Parser {
     // MAYBE change to :Something, Something:Iterator<Array<String>>
     public static function parse(text:String, ?separator=",", ?escape="\"", ?endOfLine="\n"):Array<Record>
     {
-        var p = new Parser(separator, escape, endOfLine, null);
+        var p = new Parser(separator, escape, endOfLine);
         p.buffer = text;
         return p.readAll();
     }
@@ -235,7 +267,7 @@ class Parser {
     // TODO remove
     public static function parseUtf8(text:String, ?separator=",", ?escape="\"", ?endOfLine="\n"):Array<Record>
     {
-        var p = new Utf8Parser(separator, escape, endOfLine, null);
+        var p = new Utf8Parser(separator, escape, endOfLine);
         p.buffer = text;
         return p.readAll();
     }
