@@ -255,19 +255,12 @@ class Reader {
         return r;
     }
 
-    // TODO rename to 'read'
-    // MAYBE change to :Something, Something:Iterator<Array<String>>
-    public static function parse(text:String, ?separator=",", ?escape="\"", ?endOfLine="\n"):Array<Record>
+    /*
+       Read and return all records in `text`.
+    */
+    public static function read(text:String, ?separator=",", ?escape="\"", ?endOfLine="\n"):Array<Record>
     {
         var p = new Reader(separator, escape, endOfLine);
-        p.buffer = text;
-        return p.readAll();
-    }
-
-    // TODO remove
-    public static function parseUtf8(text:String, ?separator=",", ?escape="\"", ?endOfLine="\n"):Array<Record>
-    {
-        var p = new Utf8Reader(separator, escape, endOfLine);
         p.buffer = text;
         return p.readAll();
     }

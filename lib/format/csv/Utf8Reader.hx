@@ -1,5 +1,6 @@
 package format.csv;
 
+import format.csv.Data;
 import haxe.Utf8;
 import haxe.io.*;
 
@@ -69,6 +70,16 @@ class Utf8Reader extends Reader {
         } catch (e:Eof) {
             return null;
         }
+    }
+
+    /*
+       Read and return all records in `text`.
+    */
+    public static function read(text:String, ?separator=",", ?escape="\"", ?endOfLine="\n"):Array<Record>
+    {
+        var p = new Utf8Reader(separator, escape, endOfLine);
+        p.buffer = text;
+        return p.readAll();
     }
 }
 

@@ -66,8 +66,8 @@ class BaseTest {
 
     public function testRead()
     {
-        var n = Reader.parse.bind(_, ",", "\"", eol);
-        var u = Reader.parseUtf8.bind(_, ",", "\"", eol);
+        var n = Reader.read.bind(_, ",", "\"", eol);
+        var u = Utf8Reader.read.bind(_, ",", "\"", eol);
 
         // string/normal reader
         // multiple records
