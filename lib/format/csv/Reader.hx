@@ -38,6 +38,7 @@ class Reader {
     var inp:Null<Input>;
 
     var eolsize:Int;  // cached eol size, computed with stringLength
+    var starting:Bool;
     var buffer:String;
     var pos:Int;
     var bufferOffset:Int;
@@ -184,13 +185,13 @@ class Reader {
     */
     public function reset(?string:String, ?stream:Input):Void
     {
+        starting = true;
         buffer = string != null ? string : "";
         inp = stream;
         pos = 0;
         bufferOffset = 0;
         cachedToken = null;
         cachedPos = 0;
-        starting = true;
     }
 
     /*
@@ -256,8 +257,6 @@ class Reader {
             throw 'Unexpected "${peekToken()}" after record';
         return r;
     }
-
-    var starting:Bool;
 
     public function hasNext()
     {
