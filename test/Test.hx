@@ -73,7 +73,7 @@ class BaseTest {
         // multiple records
         Assert.same([["a","b","c"], ["d","e","f"]], n('a,b,c${eol}d,e,f'));
         // empty string
-        Assert.equals([[]].toString(), n('').toString());  // FIXME bug on utest
+        Assert.same([[""]].toString(), n('').toString());
         // single record with/without eol
         Assert.same([["a","b","c"]], n('a,b,c'));
         Assert.same([["a","b","c"]], n('a,b,c${eol}'));
