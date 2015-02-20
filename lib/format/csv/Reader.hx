@@ -90,11 +90,11 @@ class Reader {
 
     function peekToken(?skip=0)
     {
-        var token = cachedToken, p = cachedPos;
-        if (token == null)
-            cachedPos = pos;
-        else
+        var token = cachedToken, p = pos;
+        if (token != null) {
+            p = cachedPos;
             skip--;
+        }
 
         while (skip-- >= 0) {
             token = get(p, eolsize) == eol ? eol : get(p, 1);
