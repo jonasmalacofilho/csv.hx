@@ -260,7 +260,7 @@ class Reader {
 
     public function hasNext()
     {
-        return starting || (peekToken() != null && (starting || peekToken(1) != null));
+        return starting || (peekToken() != null && peekToken(1) != null);
     }
 
     public function next()
