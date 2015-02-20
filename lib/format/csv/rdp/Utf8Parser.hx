@@ -4,7 +4,7 @@ import haxe.Utf8;
 import haxe.io.*;
 
 class Utf8Parser extends Parser {
-    override function substring(str, pos, ?len)
+    override function substring(str, pos, ?len:Null<Int>)
     {
         if (len == null)
             len = Utf8.length(str);
