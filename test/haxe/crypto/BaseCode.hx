@@ -109,7 +109,7 @@ class BaseCode {
 	}
 
 	public function encodeString( s : String ) {
-		#if (!macro && !interp && !neko)
+		#if (!macro && !interp && neko)
 		return neko.NativeString.toString( base_encode(neko.NativeString.ofString(s),base.getData()) );
 		#else
 		return encodeBytes(haxe.io.Bytes.ofString(s)).toString();
@@ -117,7 +117,7 @@ class BaseCode {
 	}
 
 	public function decodeString( s : String ) {
-		#if (!macro && !interp && !neko)
+		#if (!macro && !interp && neko)
 		return neko.NativeString.toString( base_decode(neko.NativeString.ofString(s),base.getData()) );
 		#else
 		return decodeBytes(haxe.io.Bytes.ofString(s)).toString();
