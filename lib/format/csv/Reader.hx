@@ -37,9 +37,9 @@ class Reader {
     var eol:String;
     var inp:Null<Input>;
 
-    var pos:Int;
     var eolsize:Int;  // cached eol size, computed with stringLength
     var buffer:String;
+    var pos:Int;
     var bufferOffset:Int;
     var tokenCache:List<{ token:String, pos:Int }>;  // cached results of peekToken
 
@@ -188,6 +188,7 @@ class Reader {
         inp = stream;
         pos = 0;
         bufferOffset = 0;
+        starting = true;
     }
 
     /*
@@ -228,6 +229,7 @@ class Reader {
     */
     public function readRecord():Record
     {
+        starting = false;
         var r = [];
         r.push(readField());
         while (peekToken() == sep) {
@@ -253,6 +255,28 @@ class Reader {
         if (peekToken() != null)
             throw 'Unexpected "${peekToken()}" after record';
         return r;
+    }
+
+    var starting:Bool;
+
+    public function hasNext()
+    {
+        return starting || (peekToken() != null && (starting || peekToken(1) != null));
+    }
+
+    public function next()
+    {
+        if (!starting) {
+            var nl = nextToken();
+            if (nl != eol)
+                throw 'Unexpected "${peekToken()}" after record';
+        }
+        return readRecord();
+    }
+
+    public function iterator()
+    {
+        return this;
     }
 
     /*

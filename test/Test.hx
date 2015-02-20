@@ -87,6 +87,35 @@ class BaseTest {
         Assert.same([["a","b","c"]], u('a,b,c'));
         Assert.same([["a","b","c"]], u('a,b,c${eol}'));
     }
+
+    public function testIterableApi()
+    {
+        var r = new Reader(",", "\"", eol);
+
+        // step by step
+        r.reset('a,b,c${eol}d,e,f', null);
+        Assert.isTrue(r.hasNext());
+        Assert.same(["a","b","c"], r.next());
+        Assert.isTrue(r.hasNext());
+        Assert.same(["d","e","f"], r.next());
+        Assert.isFalse(r.hasNext());
+
+        // empty string
+        r.reset('', null);
+        Assert.isTrue(r.hasNext());
+        Assert.same([""], r.next());
+        Assert.isFalse(r.hasNext());
+
+        // newline terminated document
+        r.reset('a${eol}', null);
+        Assert.isTrue(r.hasNext());
+        Assert.same(["a"], r.next());
+        Assert.isFalse(r.hasNext());
+
+        // `starting` flag updates on other public APIs
+        r.reset('', null); r.readRecord(); Assert.isFalse(r.hasNext());
+        r.reset('', null); r.readAll(); Assert.isFalse(r.hasNext());
+    }
 }
 
 class TestNixEol extends BaseTest {
