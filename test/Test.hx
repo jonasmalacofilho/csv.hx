@@ -5,100 +5,82 @@ import utest.ui.Report;
 class BaseTest {
     var eol:String;
 
-    function recordString(rec:Array<String>)
+    public function testNormalRecordReading()
     {
-        return "[" + rec.join("|") + "]";
-    }
+        var reader = new Parser(",", "\"", eol);
+        function r(str)
+        {
+            reader.reset(str, null);
+            return reader.readRecord();
+        }
 
-    function csvString(csv:Array<Array<String>>)
-    {
-        return "{" + csv.map(recordString).join(";") + "}";
-    }
-
-    static function stringParser(text, sep, esc, eol, ?utf8=false)
-    {
-        var p = utf8 ? new Utf8Parser(sep, esc, eol) : new Parser(sep, esc, eol);
-        p.reset(text);
-        return p;
-    }
-
-    function parseRecord(text)
-    {
-        var p = stringParser(text, ",", "\"", eol);
-        return recordString(p.readRecord());
-    }
-
-    function parseCsv(text)
-    {
-        return csvString(Parser.parse(text, ",", "\"", eol));
-    }
-
-    public function testParseRecord()
-    {
-        Assert.equals('[a|b|c]', parseRecord('a,b,c'));
+        Assert.same(["a","b","c"], r('a,b,c'));
         // escaping
-        Assert.equals('[a|b|c]', parseRecord('"a",b,c'));
-        Assert.equals('["a"|b|c]', parseRecord('"""a""",b,c'));
-        Assert.equals('[a"a|b|c]', parseRecord('"a""a",b,c'));  // esc
-        Assert.equals('[a,a|b|c]', parseRecord('"a,a",b,c'));  // sep
-        Assert.equals('[a${eol}a|b|c]', parseRecord('"a${eol}a",b,c'));  // eol
-        Assert.equals('[a",${eol}"a|b|c]', parseRecord('"a"",${eol}""a",b,c'));  // esc, sep & eol
+        Assert.same(["a","b","c"], r('"a",b,c'));
+        Assert.same(['"a"',"b","c"], r('"""a""",b,c'));
+        Assert.same(['a"a',"b","c"], r('"a""a",b,c'));  // esc
+        Assert.same(['a,a',"b","c"], r('"a,a",b,c'));  // sep
+        Assert.same(['a${eol}a',"b","c"], r('"a${eol}a",b,c'));  // eol
+        Assert.same(['a",${eol}"a',"b","c"], r('"a"",${eol}""a",b,c'));  // esc, sep & eol
         // empty fields
-        Assert.equals('[||]', parseRecord(',,'));
-        Assert.equals('[||]', parseRecord('"","",""'));
+        Assert.same(["","",""], r(',,'));
+        Assert.same(["","",""], r('"","",""'));
     }
 
-    public function testParseCsv()
+    public function testSafeUtf8RecordReading()
     {
-        // multiple records
-        Assert.equals('{[a|b|c];[d|e|f]}', parseCsv('a,b,c${eol}d,e,f'));
-        // empty string
-        Assert.equals('{[]}', parseCsv(''));
-        // single record with/without eol
-        Assert.equals('{[a|b|c]}', parseCsv('a,b,c'));
-        Assert.equals('{[a|b|c]}', parseCsv('a,b,c${eol}'));
-    }
-
-    public function testSafeUtf8chars()
-    {
-        function parseUtf8(text)
+        function r(reader, str)
         {
-            var p = stringParser(text, ",", "\"", eol, true);
-            return recordString(p.readRecord());
-        }
-        Assert.equals('[α|β|γ]', parseUtf8('α,β,γ'));
-        
-        Assert.equals('[α|β|γ]', parseRecord('α,β,γ'));
-    }
-
-    public function testAnyUtf8chars()
-    {
-        function parseUtf8(text)
-        {
-            var p = stringParser(text, "➔", "✍", eol, true);
-            return recordString(p.readRecord());
+            reader.reset(str, null);
+            return reader.readRecord();
         }
 
-        Assert.equals('[a|b|c]', parseUtf8('a➔b➔c'));
-        Assert.equals('[a|b|c]', parseUtf8('✍a✍➔b➔c'));
-        Assert.equals('[α|β|γ]', parseUtf8('α➔β➔γ'));
+        var n = new Parser(",", "\"", eol);
+        var u = new Utf8Parser(",", "\"", eol);
+
+        Assert.same(["α","β","γ"], r(n, 'α,β,γ'));
+        Assert.same(["α","β","γ"], r(u, 'α,β,γ'));
     }
+
+    public function testUnsafeUtf8RecordReading()
+    {
+        function r(reader, str)
+        {
+            reader.reset(str, null);
+            return reader.readRecord();
+        }
 
 #if (js || java || cs || swf)
-    // on targets where String already has unicode support, the Utf8Parser
-    // shouldn't be necessary
-    public function testNativeUnicodeSupport()
-    {
-        function parseUnicode(text)
-        {
-            var p = stringParser(text, "➔", "✍", eol, false);
-            return recordString(p.readRecord());
-        }
-        Assert.equals('[a|b|c]', parseUnicode('a➔b➔c'));
-        Assert.equals('[a|b|c]', parseUnicode('✍a✍➔b➔c'));
-        Assert.equals('[α|β|γ]', parseUnicode('α➔β➔γ'));
-    }
+        // on targets where String already has unicode support, the Utf8Parser
+        // shouldn't be necessary
+        var n = new Parser("➔", "✍", eol);
+        Assert.same(["a","b","c"], r(n, 'a➔b➔c'));
+        Assert.same(["a","b","c"], r(n, '✍a✍➔b➔c'));
+        Assert.same(["α","β","γ"], r(n, 'α➔β➔γ'));
 #end
+        var u = new Utf8Parser("➔", "✍", eol);
+        Assert.same(["a","b","c"], r(u, 'a➔b➔c'));
+        Assert.same(["a","b","c"], r(u, '✍a✍➔b➔c'));
+        Assert.same(["α","β","γ"], r(u, 'α➔β➔γ'));
+    }
+
+    public function testReadAll()
+    {
+        var reader = new Parser(",", "\"", eol);
+        function r(str)
+        {
+            reader.reset(str, null);
+            return reader.readAll();
+        }
+
+        // multiple records
+        Assert.same([["a","b","c"], ["d","e","f"]], r('a,b,c${eol}d,e,f'));
+        // empty string
+        Assert.equals([[]].toString(), r('').toString());  // FIXME bug on utest
+        // single record with/without eol
+        Assert.same([["a","b","c"]], r('a,b,c'));
+        Assert.same([["a","b","c"]], r('a,b,c${eol}'));
+    }
 }
 
 class TestNixEol extends BaseTest {
