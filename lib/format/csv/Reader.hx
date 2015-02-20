@@ -41,7 +41,8 @@ class Reader {
     var buffer:String;
     var pos:Int;
     var bufferOffset:Int;
-    var tokenCache:List<{ token:String, pos:Int }>;  // cached results of peekToken
+    var cachedToken:Null<String>;
+    var cachedPos:Int;  // invalid if cachedToken == null
 
     // Used instead of `String.substr`
     // (important for Utf8 support in subclass)
@@ -88,23 +89,21 @@ class Reader {
 
     function peekToken(?skip=0)
     {
-        var peek = skip + 1;
+        var token = cachedToken, p = cachedPos;
+        if (token == null)
+            cachedPos = pos;
+        else
+            skip--;
 
-        var token = null, p = pos;
-        for (t in tokenCache) {
-            token = t.token;
-            p = t.pos;
-            peek--;
-            if (peek <= 0)
-                break;
-        }
-
-        while (peek-- > 0) {
+        while (skip-- >= 0) {
             token = get(p, eolsize) == eol ? eol : get(p, 1);
             if (token == null)
                 break;
             p += stringLength(token);
-            tokenCache.add({ token : token, pos : p });
+            if (cachedToken == null) {
+                cachedToken = token;
+                cachedPos = p;
+            }
         }
         return token;
     }
@@ -114,7 +113,8 @@ class Reader {
         var ret = peekToken();
         if (ret == null)
             return null;
-        pos = tokenCache.pop().pos;
+        pos = cachedPos;
+        cachedToken = null;
         return ret;
     }
 
@@ -188,7 +188,8 @@ class Reader {
         inp = stream;
         pos = 0;
         bufferOffset = 0;
-        tokenCache = new List();
+        cachedToken = null;
+        cachedPos = 0;
         starting = true;
     }
 
