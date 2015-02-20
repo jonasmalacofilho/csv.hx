@@ -5,7 +5,7 @@ import utest.ui.Report;
 class BaseTest {
     var eol:String;
 
-    public function testNormalRecordReading()
+    public function test01_NormalRecordReading()
     {
         var reader = new Reader(",", "\"", eol);
         function r(str)
@@ -27,7 +27,7 @@ class BaseTest {
         Assert.same(["","",""], r('"","",""'));
     }
 
-    public function testSafeUtf8RecordReading()
+    public function test02_SafeUtf8RecordReading()
     {
         function r(reader, str)
         {
@@ -42,7 +42,7 @@ class BaseTest {
         Assert.same(["α","β","γ"], r(u, 'α,β,γ'));
     }
 
-    public function testUnsafeUtf8RecordReading()
+    public function test03_UnsafeUtf8RecordReading()
     {
         function r(reader, str)
         {
@@ -64,7 +64,7 @@ class BaseTest {
         Assert.same(["α","β","γ"], r(u, 'α➔β➔γ'));
     }
 
-    public function testRead()
+    public function test04_Read()
     {
         var n = Reader.read.bind(_, ",", "\"", eol);
         var u = Utf8Reader.read.bind(_, ",", "\"", eol);
@@ -88,7 +88,7 @@ class BaseTest {
         Assert.same([["a","b","c"]], u('a,b,c${eol}'));
     }
 
-    public function testIterableApi()
+    public function test05_IterableApi()
     {
         var r = new Reader(",", "\"", eol);
 
