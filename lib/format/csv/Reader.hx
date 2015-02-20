@@ -178,6 +178,18 @@ class Reader {
         }
     }
 
+    function readRecord()
+    {
+        starting = false;
+        var r = [];
+        r.push(readField());
+        while (peekToken() == sep) {
+            nextToken();
+            r.push(readField());
+        }
+        return r;
+    }
+
     /*
        Reset the reader with some input data.
 
@@ -222,24 +234,6 @@ class Reader {
         eolsize = stringLength(eol);
 
         reset(buffer, null);
-    }
-
-    /*
-       Read and return a single record.
-
-       This will process the input until a separator or an end-of-line is
-       found.
-    */
-    public function readRecord():Record
-    {
-        starting = false;
-        var r = [];
-        r.push(readField());
-        while (peekToken() == sep) {
-            nextToken();
-            r.push(readField());
-        }
-        return r;
     }
 
     /*

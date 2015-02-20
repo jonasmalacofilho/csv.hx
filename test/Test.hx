@@ -13,7 +13,7 @@ class BaseTest {
         function r(str)
         {
             reader.reset(str, null);
-            return reader.readRecord();
+            return reader.next();
         }
 
         Assert.same(["a","b","c"], r('a,b,c'));
@@ -34,7 +34,7 @@ class BaseTest {
         function r(reader, str)
         {
             reader.reset(str, null);
-            return reader.readRecord();
+            return reader.next();
         }
 
         var n = new Reader(",", "\"", eol);
@@ -49,7 +49,7 @@ class BaseTest {
         function r(reader, str)
         {
             reader.reset(str, null);
-            return reader.readRecord();
+            return reader.next();
         }
 
 #if (js || java || cs || swf)
@@ -90,6 +90,7 @@ class BaseTest {
         Assert.same([["a","b","c"]], u('a,b,c${eol}'));
     }
 
+    @:access(format.csv.Reader.readRecord)
     public function test05_IterableApi()
     {
         var reader = new Reader(",", "\"", eol);
