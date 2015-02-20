@@ -92,37 +92,37 @@ class BaseTest {
 
     public function test05_IterableApi()
     {
-        var r = new Reader(",", "\"", eol);
+        var reader = new Reader(",", "\"", eol);
 
         // step by step
-        r.reset('a,b,c${eol}d,e,f', null);
-        Assert.isTrue(r.hasNext());
-        Assert.same(["a","b","c"], r.next());
-        Assert.isTrue(r.hasNext());
-        Assert.same(["d","e","f"], r.next());
-        Assert.isFalse(r.hasNext());
+        reader.reset('a,b,c${eol}d,e,f', null);
+        Assert.isTrue(reader.hasNext());
+        Assert.same(["a","b","c"], reader.next());
+        Assert.isTrue(reader.hasNext());
+        Assert.same(["d","e","f"], reader.next());
+        Assert.isFalse(reader.hasNext());
 
         // empty string
-        r.reset('', null);
-        Assert.isTrue(r.hasNext());
-        Assert.same([""], r.next());
-        Assert.isFalse(r.hasNext());
+        reader.reset('', null);
+        Assert.isTrue(reader.hasNext());
+        Assert.same([""], reader.next());
+        Assert.isFalse(reader.hasNext());
 
         // newline terminated document
-        r.reset('a${eol}', null);
-        Assert.isTrue(r.hasNext());
-        Assert.same(["a"], r.next());
-        Assert.isFalse(r.hasNext());
+        reader.reset('a${eol}', null);
+        Assert.isTrue(reader.hasNext());
+        Assert.same(["a"], reader.next());
+        Assert.isFalse(reader.hasNext());
 
         // `starting` flag updates on other public APIs
-        r.reset('', null); r.readRecord(); Assert.isFalse(r.hasNext());
-        r.reset('', null); r.readAll(); Assert.isFalse(r.hasNext());
+        reader.reset('', null); reader.readRecord(); Assert.isFalse(reader.hasNext());
+        reader.reset('', null); reader.readAll(); Assert.isFalse(reader.hasNext());
 
         // iterator & iterable usage
-        r.reset('a,b,c${eol}d,e,f', null);
-        Assert.same([["a","b","c"], ["d","e","f"]], [for (record in r) record]);
-        r.reset('a,b,c${eol}d,e,f', null);
-        Assert.same(Lambda.list([["a","b","c"], ["d","e","f"]]), Lambda.list(r));
+        reader.reset('a,b,c${eol}d,e,f', null);
+        Assert.same([["a","b","c"], ["d","e","f"]], [for (record in reader) record]);
+        reader.reset('a,b,c${eol}d,e,f', null);
+        Assert.same(Lambda.list([["a","b","c"], ["d","e","f"]]), Lambda.list(reader));
     }
 
     public function test06_Streams()
