@@ -11,12 +11,12 @@ class Utf8Parser extends Parser {
         return Utf8.sub(str, pos, len);
     }
 
-    override function stringLength(str):Int
+    override function stringLength(str)
     {
         return Utf8.length(str);
     }
 
-    function validUtf8(bytes:Bytes, pos, len)
+    function validUtf8(bytes, pos, len)
     {
         // adapted from neko/libs/std/utf8.c@utf8_validate
         while (pos < len) {
@@ -46,7 +46,7 @@ class Utf8Parser extends Parser {
         return -1;
     }
 
-    override function readMore(n:Int)
+    override function fetchBytes(n)
     {
         if (inp == null)
             return null;

@@ -26,7 +26,7 @@ class BaseTest {
     function parseRecord(text)
     {
         var p = stringParser(text, ",", "\"", eol);
-        return recordString(p.record());
+        return recordString(p.readRecord());
     }
 
     function parseCsv(text)
@@ -65,7 +65,7 @@ class BaseTest {
         function parseUtf8(text)
         {
             var p = stringParser(text, ",", "\"", eol, true);
-            return recordString(p.record());
+            return recordString(p.readRecord());
         }
         Assert.equals('[α|β|γ]', parseUtf8('α,β,γ'));
         
@@ -77,7 +77,7 @@ class BaseTest {
         function parseUtf8(text)
         {
             var p = stringParser(text, "➔", "✍", eol, true);
-            return recordString(p.record());
+            return recordString(p.readRecord());
         }
 
         Assert.equals('[a|b|c]', parseUtf8('a➔b➔c'));
@@ -93,7 +93,7 @@ class BaseTest {
         function parseUnicode(text)
         {
             var p = stringParser(text, "➔", "✍", eol, false);
-            return recordString(p.record());
+            return recordString(p.readRecord());
         }
         Assert.equals('[a|b|c]', parseUnicode('a➔b➔c'));
         Assert.equals('[a|b|c]', parseUnicode('✍a✍➔b➔c'));

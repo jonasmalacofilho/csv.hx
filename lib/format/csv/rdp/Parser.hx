@@ -17,9 +17,9 @@ import haxe.io.*;
 
     Non-terminals:
 
-        safe                 ::=  !( esc | sep | eol )
-        escaped              ::=  safe | esc esc | sep | eol
-        non_escaped_string   ::=  "" | safe non_escaped_string
+        safe_char            ::=  !( esc | sep | eol )
+        escaped_char         ::=  safe | esc esc | sep | eol
+        string               ::=  "" | safe non_escaped_string
         escaped_string       ::=  "" | escaped escaped_string
         field                ::=  esc escaped_string esc | non_escaped_string
         record               ::=  field | field sep record
@@ -81,7 +81,7 @@ class Parser {
         bufferOffset = 0;
     }
 
-    function readMore(n:Int)
+    function fetchBytes(n:Int):Null<String>
     {
         if (inp == null)
             return null;
@@ -95,11 +95,11 @@ class Parser {
         }
     }
 
-    function read(p:Int, len:Int):String
+    function get(p, len)
     {
         var bpos = p - bufferOffset;
         if (bpos + len > stringLength(buffer)) {
-            var more = readMore(4);
+            var more = fetchBytes(4);
             if (more != null) {
                 buffer = substring(buffer, pos - bufferOffset) + more;
                 bufferOffset = pos;
@@ -124,7 +124,7 @@ class Parser {
         }
 
         while (peek-- > 0) {
-            token = read(p, eolsize) == eol ? eol : read(p, 1);
+            token = get(p, eolsize) == eol ? eol : get(p, 1);
             if (token == null)
                 break;
             p += stringLength(token);
@@ -142,7 +142,7 @@ class Parser {
         return ret;
     }
 
-    function safe()
+    function readSafeChar()
     {
         var cur = peekToken();
         if (cur == sep || cur == esc || cur == eol)
@@ -150,7 +150,7 @@ class Parser {
         return nextToken();
     }
 
-    function escaped()
+    function readEscapedChar()
     {
         var cur = peekToken();
         // It follows from the grammar that the only forbidden result is an isolated escape
@@ -162,62 +162,62 @@ class Parser {
         return nextToken();
     }
 
-    function escapedString()
+    function readEscapedString()
     {
         var buf = new StringBuf();
-        var x = escaped();
+        var x = readEscapedChar();
         while (x != null) {
             buf.add(x);
-            x = escaped();
+            x = readEscapedChar();
         }
         return buf.toString();
     }
 
-    function nonEscapedString()
+    function readString()
     {
         var buf = new StringBuf();
-        var x = safe();
+        var x = readSafeChar();
         while (x != null) {
             buf.add(x);
-            x = safe();
+            x = readSafeChar();
         }
         return buf.toString();
     }
 
-    function field()
+    function readField()
     {
         var cur = peekToken();
         if (cur == esc) {
             nextToken();
-            var s = escapedString();
+            var s = readEscapedString();
             var fi = nextToken();
             if (fi != esc)
                 throw 'Missing $esc at the end of escaped field ${s.length>15 ? s.substr(0,10)+"[...]" : s}';
             return s;
         } else {
-            return nonEscapedString();
+            return readString();
         }
     }
 
-    function record()
+    function readRecord()
     {
         var r = [];
-        r.push(field());
+        r.push(readField());
         while (peekToken() == sep) {
             nextToken();
-            r.push(field());
+            r.push(readField());
         }
         return r;
     }
 
-    function records()
+    function readAll()
     {
         var r = [];
-        r.push(record());
+        r.push(readRecord());
         var nl = nextToken();
         while (nl == eol) {
             if (peekToken() != null)
-                r.push(record());  // don't append an empty record for eol terminating string
+                r.push(readRecord());  // don't append an empty record for eol terminating string
             nl = nextToken();
         }
         if (peekToken() != null)
@@ -225,18 +225,21 @@ class Parser {
         return r;
     }
 
+    // TODO rename to 'read'
+    // MAYBE change to :Something, Something:Iterator<Array<String>>
     public static function parse(text:String, ?separator=",", ?escape="\"", ?endOfLine="\n"):Array<Record>
     {
         var p = new Parser(separator, escape, endOfLine, null);
         p.buffer = text;
-        return p.records();
+        return p.readAll();
     }
 
+    // TODO remove
     public static function parseUtf8(text:String, ?separator=",", ?escape="\"", ?endOfLine="\n"):Array<Record>
     {
         var p = new Utf8Parser(separator, escape, endOfLine, null);
         p.buffer = text;
-        return p.records();
+        return p.readAll();
     }
 }
 
