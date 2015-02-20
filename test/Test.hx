@@ -1,4 +1,6 @@
 import format.csv.*;
+import haxe.crypto.BaseCode;
+import haxe.io.*;
 import utest.*;
 import utest.ui.Report;
 
@@ -121,6 +123,30 @@ class BaseTest {
         Assert.same([["a","b","c"], ["d","e","f"]], [for (record in r) record]);
         r.reset('a,b,c${eol}d,e,f', null);
         Assert.same(Lambda.list([["a","b","c"], ["d","e","f"]]), Lambda.list(r));
+    }
+
+    public function test06_Streams()
+    {
+        var n = new Reader(",", "\"", eol);
+        var u = new Utf8Reader(",", "\"", eol);
+
+        function r(reader, hex)
+        {
+            var d = new BaseCode(Bytes.ofString("0123456789abcdef"));
+            var i = new BytesInput(d.decodeBytes(Bytes.ofString(hex)));
+            reader.reset(null, i);
+            return reader.readAll();
+        }
+
+        var heol = Bytes.ofString(eol).toHex();
+
+        // string/normal reader
+        Assert.same([["a","b","c"], ["d","e","f"]], r(n, '612c622c63${heol}642c652c66'));
+        Assert.same([["α","β","γ"], ["d","e","f"]], r(n, 'ceb12cceb22cceb3${heol}642c652c66'));
+
+        // utf8 reader
+        Assert.same([["a","b","c"], ["d","e","f"]], r(u, '612c622c63${heol}642c652c66'));
+        Assert.same([["α","β","γ"], ["d","e","f"]], r(u, 'ceb12cceb22cceb3${heol}642c652c66'));
     }
 }
 

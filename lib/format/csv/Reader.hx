@@ -32,6 +32,8 @@ import haxe.io.*;
      - Token: null | esc | sep | eol | safe
 */
 class Reader {
+    static inline var FETCH_SIZE = #if UNIT_TESTING_CSV 4 #else 4096 #end;  // must be larger than any token
+
     var sep:String;
     var esc:String;
     var eol:String;
@@ -77,7 +79,7 @@ class Reader {
     {
         var bpos = p - bufferOffset;
         if (bpos + len > stringLength(buffer)) {
-            var more = fetchBytes(4);
+            var more = fetchBytes(FETCH_SIZE);
             if (more != null) {
                 buffer = substring(buffer, pos - bufferOffset) + more;
                 bufferOffset = pos;

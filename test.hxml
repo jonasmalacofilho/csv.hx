@@ -3,4 +3,5 @@
 -cp test
 -cp lib
 -lib utest
+-D UNIT_TESTING_CSV
 

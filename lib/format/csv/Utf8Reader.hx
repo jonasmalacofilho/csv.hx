@@ -53,7 +53,7 @@ class Utf8Reader extends Reader {
             return null;
 
         try {
-            var bytes = Bytes.alloc(n + 4);
+            var bytes = Bytes.alloc(n + 3);
             var got = inp.readBytes(bytes, 0, n);
 
             var e = validUtf8(bytes, 0, got);
