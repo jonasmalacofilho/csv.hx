@@ -64,9 +64,27 @@ class BaseTest {
         Assert.same(["α","β","γ"], r(u, 'α➔β➔γ'));
     }
 
-    public function testReadAll()
+    public function testNormalReadAll()
     {
         var reader = new Parser(",", "\"", eol);
+        function r(str)
+        {
+            reader.reset(str, null);
+            return reader.readAll();
+        }
+
+        // multiple records
+        Assert.same([["a","b","c"], ["d","e","f"]], r('a,b,c${eol}d,e,f'));
+        // empty string
+        Assert.equals([[]].toString(), r('').toString());  // FIXME bug on utest
+        // single record with/without eol
+        Assert.same([["a","b","c"]], r('a,b,c'));
+        Assert.same([["a","b","c"]], r('a,b,c${eol}'));
+    }
+
+    public function testUtf8ReadAll()
+    {
+        var reader = new Utf8Parser(",", "\"", eol);
         function r(str)
         {
             reader.reset(str, null);
