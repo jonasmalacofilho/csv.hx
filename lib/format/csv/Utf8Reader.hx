@@ -1,9 +1,9 @@
-package format.csv.rdp;
+package format.csv;
 
 import haxe.Utf8;
 import haxe.io.*;
 
-class Utf8Parser extends Parser {
+class Utf8Reader extends Reader {
     override function substring(str, pos, ?len:Null<Int>)
     {
         if (len == null)

@@ -1,6 +1,6 @@
-package format.csv.rdp;
+package format.csv;
 
-import format.csv.rdp.Types;
+import format.csv.Data;
 import haxe.io.*;
 
 /*
@@ -31,7 +31,7 @@ import haxe.io.*;
        text is automatically striped.
      - Token: null | esc | sep | eol | safe
 */
-class Parser {
+class Reader {
     var sep:String;
     var esc:String;
     var eol:String;
@@ -259,7 +259,7 @@ class Parser {
     // MAYBE change to :Something, Something:Iterator<Array<String>>
     public static function parse(text:String, ?separator=",", ?escape="\"", ?endOfLine="\n"):Array<Record>
     {
-        var p = new Parser(separator, escape, endOfLine);
+        var p = new Reader(separator, escape, endOfLine);
         p.buffer = text;
         return p.readAll();
     }
@@ -267,7 +267,7 @@ class Parser {
     // TODO remove
     public static function parseUtf8(text:String, ?separator=",", ?escape="\"", ?endOfLine="\n"):Array<Record>
     {
-        var p = new Utf8Parser(separator, escape, endOfLine);
+        var p = new Utf8Reader(separator, escape, endOfLine);
         p.buffer = text;
         return p.readAll();
     }

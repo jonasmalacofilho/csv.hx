@@ -1,4 +1,4 @@
-import format.csv.rdp.*;
+import format.csv.*;
 import utest.*;
 import utest.ui.Report;
 
@@ -7,7 +7,7 @@ class BaseTest {
 
     public function testNormalRecordReading()
     {
-        var reader = new Parser(",", "\"", eol);
+        var reader = new Reader(",", "\"", eol);
         function r(str)
         {
             reader.reset(str, null);
@@ -35,8 +35,8 @@ class BaseTest {
             return reader.readRecord();
         }
 
-        var n = new Parser(",", "\"", eol);
-        var u = new Utf8Parser(",", "\"", eol);
+        var n = new Reader(",", "\"", eol);
+        var u = new Utf8Reader(",", "\"", eol);
 
         Assert.same(["α","β","γ"], r(n, 'α,β,γ'));
         Assert.same(["α","β","γ"], r(u, 'α,β,γ'));
@@ -51,14 +51,14 @@ class BaseTest {
         }
 
 #if (js || java || cs || swf)
-        // on targets where String already has unicode support, the Utf8Parser
+        // on targets where String already has unicode support, the Utf8Reader
         // shouldn't be necessary
-        var n = new Parser("➔", "✍", eol);
+        var n = new Reader("➔", "✍", eol);
         Assert.same(["a","b","c"], r(n, 'a➔b➔c'));
         Assert.same(["a","b","c"], r(n, '✍a✍➔b➔c'));
         Assert.same(["α","β","γ"], r(n, 'α➔β➔γ'));
 #end
-        var u = new Utf8Parser("➔", "✍", eol);
+        var u = new Utf8Reader("➔", "✍", eol);
         Assert.same(["a","b","c"], r(u, 'a➔b➔c'));
         Assert.same(["a","b","c"], r(u, '✍a✍➔b➔c'));
         Assert.same(["α","β","γ"], r(u, 'α➔β➔γ'));
@@ -66,8 +66,8 @@ class BaseTest {
 
     public function testRead()
     {
-        var n = Parser.parse.bind(_, ",", "\"", eol);
-        var u = Parser.parseUtf8.bind(_, ",", "\"", eol);
+        var n = Reader.parse.bind(_, ",", "\"", eol);
+        var u = Reader.parseUtf8.bind(_, ",", "\"", eol);
 
         // string/normal reader
         // multiple records
