@@ -35,7 +35,7 @@ import format.csv.*;
 var input:haxe.io.Input;    // CSV data in a File, Socket or other Input subclass
 
 // create a reader
-var reader = new Reader();  // optionally specify different control strings
+var reader = new Reader(",", "\"", "\n");
 
 // reset the reader with the stream
 reader.reset(null, input);  // a string or a combination of both string and input can also be used
