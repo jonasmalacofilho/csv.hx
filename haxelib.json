@@ -8,6 +8,6 @@
     "classPath"    :  "lib",
     "releasenote"  :  "Cross-platform streaming reader with support for UTF-8 and variable control strings",
     "contributors" :  ["jonasmalacofilho", "elebeta"],
-    "dependencies" :  []
+    "dependencies" :  {}
 }
 
