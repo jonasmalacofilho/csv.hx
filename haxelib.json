@@ -1,13 +1,13 @@
 {
-    "name"         :  "csv-rdp",
-    "url"          :  "https://github.com/jonasmalacofilho/csv-rdp",
+    "name"         :  "csv",
+    "url"          :  "https://github.com/jonasmalacofilho/csv.hx",
     "license"      :  "BSD",
-    "tags"         :  ["format", "csv", "cross"],
-    "description"  :  "A recursive descent parser for CSV strings",
+    "tags"         :  ["cross"],
+    "description"  :  "A CSV format library for Haxe",
     "version"      :  "0.1.0",
     "classPath"    :  "lib",
-    "releasenote"  :  "Partial support for arbitrary control characters/sequences and Utf8",
-    "contributors" :  ["jonasmalacofilho"],
+    "releasenote"  :  "Cross-platform streaming reader with support for UTF-8 and variable control strings",
+    "contributors" :  ["jonasmalacofilho", "elebeta"],
     "dependencies" :  []
 }
 
