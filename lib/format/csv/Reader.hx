@@ -214,13 +214,13 @@ class Reader {
 
        Creates a native String Csv reader.
 
-       Params:
+       Optional parameters:
 
         - `separator`: 1-char separator string
         - `escape`: 1-char escape (or "quoting") string
         - `endOfLine`: end-of-line sequence string
     */
-    public function new(separator:String, escape:String, endOfLine:String)
+    public function new(?separator=",", ?escape="\"", ?endOfLine="\n")
     {
         if (stringLength(separator) != 1)
             throw 'Separator string "$separator" not allowed, only single char';
