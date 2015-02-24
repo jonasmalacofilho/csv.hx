@@ -5,6 +5,22 @@ import haxe.Utf8;
 import haxe.io.*;
 
 class Utf8Reader extends Reader {
+    /*
+       Create a new Reader.
+
+       Creates a UTF-8 specific Csv reader.
+
+       Optional parameters:
+
+        - `separator`: 1-char separator string
+        - `escape`: 1-char escape (or "quoting") string
+        - `endOfLine`: end-of-line sequence string
+    */
+    public function new(?separator=",", ?escape="\"", ?endOfLine="\n")
+    {
+        super(separator, escape, endOfLine);
+    }
+
     override function substring(str, pos, ?len:Null<Int>)
     {
         if (len == null)

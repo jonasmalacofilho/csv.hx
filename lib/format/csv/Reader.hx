@@ -212,7 +212,7 @@ class Reader {
     /*
        Create a new Reader.
 
-       Creates a native String Csv reader.
+       Creates a native platform string Csv reader.
 
        Optional parameters:
 
