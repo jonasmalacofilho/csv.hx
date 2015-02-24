@@ -191,13 +191,13 @@ class Reader {
     }
 
     /*
-       Reset the reader with some input data.
+       Reset the reader in-place with some input data and return it.
 
        Data can be provided in a string or in a stream.  If both are supplied,
        the reader will first process the entire string, switching automatically
        to the stream when there's no new data left on the string.
     */
-    public function reset(?string:String, ?stream:Input):Void
+    public function reset(?string:String, ?stream:Input):Reader
     {
         starting = true;
         buffer = string != null ? string : "";
@@ -206,6 +206,7 @@ class Reader {
         bufferOffset = 0;
         cachedToken = null;
         cachedPos = 0;
+        return this;
     }
 
     /*

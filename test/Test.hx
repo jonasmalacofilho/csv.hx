@@ -12,8 +12,7 @@ class BaseTest {
         var reader = new Reader(",", "\"", eol);
         function r(str)
         {
-            reader.reset(str, null);
-            return reader.next();
+            return reader.reset(str, null).next();
         }
 
         Assert.same(["a","b","c"], r('a,b,c'));
@@ -33,8 +32,7 @@ class BaseTest {
     {
         function r(reader, str)
         {
-            reader.reset(str, null);
-            return reader.next();
+            return reader.reset(str, null).next();
         }
 
         var n = new Reader(",", "\"", eol);
@@ -48,8 +46,7 @@ class BaseTest {
     {
         function r(reader, str)
         {
-            reader.reset(str, null);
-            return reader.next();
+            return reader.reset(str, null).next();
         }
 
 #if (js || java || cs || swf)
@@ -135,8 +132,7 @@ class BaseTest {
         {
             var d = new BaseCode(Bytes.ofString("0123456789abcdef"));
             var i = new BytesInput(d.decodeBytes(Bytes.ofString(hex)));
-            reader.reset(null, i);
-            return reader.readAll();
+            return reader.reset(null, i).readAll();
         }
 
         var heol = Bytes.ofString(eol).toHex();
