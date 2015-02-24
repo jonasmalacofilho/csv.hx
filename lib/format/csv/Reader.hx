@@ -210,34 +210,6 @@ class Reader {
     }
 
     /*
-       Create a new Reader.
-
-       Creates a native platform string Csv reader.
-
-       Optional parameters:
-
-        - `separator`: 1-char separator string
-        - `escape`: 1-char escape (or "quoting") string
-        - `endOfLine`: end-of-line sequence string
-    */
-    public function new(?separator=",", ?escape="\"", ?endOfLine="\n")
-    {
-        if (stringLength(separator) != 1)
-            throw 'Separator string "$separator" not allowed, only single char';
-        if (stringLength(escape) != 1)
-            throw 'Escape string "$escape" not allowed, only single char';
-        if (stringLength(endOfLine) < 1)
-            throw "EOL sequence can't be empty";
-
-        sep = separator;
-        esc = escape;
-        eol = endOfLine;
-        eolsize = stringLength(eol);
-
-        reset(buffer, null);
-    }
-
-    /*
        Read and return all records available.
     */
     public function readAll():Csv
@@ -273,6 +245,34 @@ class Reader {
     public function iterator()
     {
         return this;
+    }
+
+    /*
+       Create a new Reader.
+
+       Creates a native platform string Csv reader.
+
+       Optional parameters:
+
+        - `separator`: 1-char separator string
+        - `escape`: 1-char escape (or "quoting") string
+        - `endOfLine`: end-of-line sequence string
+    */
+    public function new(?separator=",", ?escape="\"", ?endOfLine="\n")
+    {
+        if (stringLength(separator) != 1)
+            throw 'Separator string "$separator" not allowed, only single char';
+        if (stringLength(escape) != 1)
+            throw 'Escape string "$escape" not allowed, only single char';
+        if (stringLength(endOfLine) < 1)
+            throw "EOL sequence can't be empty";
+
+        sep = separator;
+        esc = escape;
+        eol = endOfLine;
+        eolsize = stringLength(eol);
+
+        reset(buffer, null);
     }
 
     /*
