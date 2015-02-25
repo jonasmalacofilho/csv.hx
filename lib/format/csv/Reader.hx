@@ -1,6 +1,7 @@
 package format.csv;
 
 import format.csv.Data;
+import haxe.EitherType;
 import haxe.io.*;
 
 /*
@@ -36,7 +37,7 @@ class Reader {
 
     var sep:String;
     var esc:String;
-    var eol:Array<String>;
+    var eol:Array<String>;  // allowed eol sequences, sorted from longest to shortest
     var inp:Null<Input>;
 
     var eolsize:Array<Int>;  // cached eol sizes, computed with stringLength
@@ -104,8 +105,10 @@ class Reader {
                 break;
             for (i in 0...eol.length) {
                 var t = get(p, eolsize[i]);
-                if (t == eol[i])
+                if (t == eol[i]) {
                     token = t;
+                    break;
+                }
             }
             p += stringLength(token);
             if (cachedToken == null) {
@@ -241,8 +244,8 @@ class Reader {
     {
         if (!starting) {
             var nl = nextToken();
-            if (!Lambda.has(eol, nl))
-                throw 'Unexpected "${peekToken()}" after record';
+            if (nl != null && !Lambda.has(eol, nl))
+                throw 'Unexpected "$nl" after record';
         }
         return readRecord();
     }
@@ -263,20 +266,26 @@ class Reader {
         - `escape`: 1-char escape (or "quoting") string
         - `endOfLine`: end-of-line sequence string
     */
-    public function new(?separator=",", ?escape="\"", ?endOfLine="\n")
+    public function new(?separator=",", ?escape="\"", ?endOfLine:EitherType<Array<String>,String>="\n")
     {
 
         if (stringLength(separator) != 1)
             throw 'Separator string "$separator" not allowed, only single char';
+        sep = separator;
+
         if (stringLength(escape) != 1)
             throw 'Escape string "$escape" not allowed, only single char';
-        if (stringLength(endOfLine) < 1)
-            throw "EOL sequence can't be empty";
-
-        sep = separator;
         esc = escape;
-        eol = [endOfLine];
-        eol.sort(function (a,b) return a.length - b.length);
+
+        if (endOfLine == null) {
+            eol = ["\r\n", "\n"];
+        }
+        else {
+            eol = Std.is(endOfLine, String) ? [endOfLine] : endOfLine;
+            if (Lambda.has(eol, null) || Lambda.has(eol, ""))
+                throw "EOL sequences can't be empty";
+            eol.sort(function (a,b) return stringLength(b) - stringLength(a));
+        }
         eolsize = eol.map(stringLength);
 
         reset(buffer, null);
@@ -285,7 +294,7 @@ class Reader {
     /*
        Read and return all records in `text`.
     */
-    public static function read(text:String, ?separator=",", ?escape="\"", ?endOfLine="\n"):Array<Record>
+    public static function read(text:String, ?separator=",", ?escape="\"", ?endOfLine:EitherType<Array<String>,String>="\n"):Array<Record>
     {
         var p = new Reader(separator, escape, endOfLine);
         p.buffer = text;

@@ -4,12 +4,13 @@ import haxe.io.*;
 import utest.*;
 import utest.ui.Report;
 
-class BaseTest {
+class BaseSuite {
+    var allowedEol:Array<String>;
     var eol:String;
 
     public function test01_NormalRecordReading()
     {
-        var reader = new Reader(",", "\"", eol);
+        var reader = new Reader(",", "\"", allowedEol);
         function r(str)
         {
             return reader.reset(str, null).next();
@@ -35,8 +36,8 @@ class BaseTest {
             return reader.reset(str, null).next();
         }
 
-        var n = new Reader(",", "\"", eol);
-        var u = new Utf8Reader(",", "\"", eol);
+        var n = new Reader(",", "\"", allowedEol);
+        var u = new Utf8Reader(",", "\"", allowedEol);
 
         Assert.same(["α","β","γ"], r(n, 'α,β,γ'));
         Assert.same(["α","β","γ"], r(u, 'α,β,γ'));
@@ -52,12 +53,12 @@ class BaseTest {
 #if (js || java || cs || swf)
         // on targets where String already has unicode support, the Utf8Reader
         // shouldn't be necessary
-        var n = new Reader("➔", "✍", eol);
+        var n = new Reader("➔", "✍", allowedEol);
         Assert.same(["a","b","c"], r(n, 'a➔b➔c'));
         Assert.same(["a","b","c"], r(n, '✍a✍➔b➔c'));
         Assert.same(["α","β","γ"], r(n, 'α➔β➔γ'));
 #end
-        var u = new Utf8Reader("➔", "✍", eol);
+        var u = new Utf8Reader("➔", "✍", allowedEol);
         Assert.same(["a","b","c"], r(u, 'a➔b➔c'));
         Assert.same(["a","b","c"], r(u, '✍a✍➔b➔c'));
         Assert.same(["α","β","γ"], r(u, 'α➔β➔γ'));
@@ -65,8 +66,8 @@ class BaseTest {
 
     public function test04_Read()
     {
-        var n = Reader.read.bind(_, ",", "\"", eol);
-        var u = Utf8Reader.read.bind(_, ",", "\"", eol);
+        var n = Reader.read.bind(_, ",", "\"", allowedEol);
+        var u = Utf8Reader.read.bind(_, ",", "\"", allowedEol);
 
         // string/normal reader
         // multiple records
@@ -90,7 +91,7 @@ class BaseTest {
     @:access(format.csv.Reader.readRecord)
     public function test05_IterableApi()
     {
-        var reader = new Reader(",", "\"", eol);
+        var reader = new Reader(",", "\"", allowedEol);
 
         // step by step
         reader.reset('a,b,c${eol}d,e,f', null);
@@ -125,8 +126,8 @@ class BaseTest {
 
     public function test06_Streams()
     {
-        var n = new Reader(",", "\"", eol);
-        var u = new Utf8Reader(",", "\"", eol);
+        var n = new Reader(",", "\"", allowedEol);
+        var u = new Utf8Reader(",", "\"", allowedEol);
 
         function r(reader, hex)
         {
@@ -147,17 +148,35 @@ class BaseTest {
     }
 }
 
-class TestNixEol extends BaseTest {
+class Suite01_NixEol extends BaseSuite {
     public function new()
     {
         this.eol = "\n";
+        this.allowedEol = [this.eol];
     }
 }
 
-class TestWindowsEol extends BaseTest {
+class Suite02_WindowsEol extends BaseSuite {
     public function new()
     {
         this.eol = "\r\n";
+        this.allowedEol = [this.eol];
+    }
+}
+
+class Suite03_NixMixedEol extends BaseSuite {
+    public function new()
+    {
+        this.eol = "\n";
+        this.allowedEol = ["\r\n", "\n"];
+    }
+}
+
+class Suite04_WindowsMixedEol extends BaseSuite {
+    public function new()
+    {
+        this.eol = "\r\n";
+        this.allowedEol = ["\r\n", "\n"];
     }
 }
 
@@ -165,8 +184,10 @@ class Test {
     static function main()
     {
         var r = new Runner();
-        r.addCase(new TestNixEol());
-        r.addCase(new TestWindowsEol());
+        r.addCase(new Suite01_NixEol());
+        r.addCase(new Suite02_WindowsEol());
+        r.addCase(new Suite03_NixMixedEol());
+        r.addCase(new Suite04_WindowsMixedEol());
         Report.create(r);
         
 #if sys
