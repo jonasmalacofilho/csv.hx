@@ -63,10 +63,16 @@ class Utf8Reader extends Reader {
                 got += inp.readBytes(bytes, got, 1);
                 e = validUtf8(bytes, e, got);
             }
+
+#if (haxe_ver >= 3.13)
             if (e != -1)
                 throw 'Invalid Utf8 stream: [...]${bytes.getString(e, got - 3)}';
-
             return bytes.getString(0, got);
+#else
+            if (e != -1)
+                throw 'Invalid Utf8 stream: [...]${bytes.readString(e, got - 3)}';
+            return bytes.readString(0, got);
+#end
         } catch (e:Eof) {
             return null;
         }

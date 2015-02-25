@@ -69,7 +69,11 @@ class Reader {
         try {
             var bytes = Bytes.alloc(n);
             var got = inp.readBytes(bytes, 0, n);
+#if (haxe_ver >= 3.13)
             return bytes.getString(0, got);
+#else
+            return bytes.readString(0, got);
+#end
         } catch (e:Eof) {
             return null;
         }
