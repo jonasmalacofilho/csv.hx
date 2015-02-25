@@ -7,7 +7,7 @@ characters).
 
 The writer has yet to be implemented.
 
-[![Build Status](https://travis-ci.org/jonasmalacofilho/csv-rdp.svg?branch=master)](https://travis-ci.org/jonasmalacofilho/csv-rdp)
+[![Build Status](https://travis-ci.org/jonasmalacofilho/csv.hx.svg?branch=master)](https://travis-ci.org/jonasmalacofilho/csv.hx)
 
 
 Usage
