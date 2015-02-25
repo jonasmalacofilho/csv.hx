@@ -1,7 +1,6 @@
 package format.csv;
 
 import format.csv.Data;
-import haxe.EitherType;
 import haxe.Utf8;
 import haxe.io.*;
 
@@ -80,11 +79,11 @@ class Utf8Reader extends Reader {
 
        Optional parameters:
 
-        - `separator`: 1-char separator string
-        - `escape`: 1-char escape (or "quoting") string
-        - `endOfLine`: end-of-line sequence string
+        - `separator`: 1-char separator string (default: ASCII comma)
+        - `escape`: 1-char escape string (default: ASCII double quote)
+        - `endOfLine`: allowed end-of-line sequences (default: either CRLF or LF)
     */
-    public function new(?separator=",", ?escape="\"", ?endOfLine:EitherType<Array<String>,String>="\n")
+    public function new(?separator, ?escape, ?endOfLine:Array<String>)
     {
         super(separator, escape, endOfLine);
     }
@@ -92,7 +91,7 @@ class Utf8Reader extends Reader {
     /*
        Read and return all records in `text`.
     */
-    public static function read(text:String, ?separator=",", ?escape="\"", ?endOfLine:EitherType<Array<String>,String>="\n"):Array<Record>
+    public static function read(text:String, ?separator, ?escape, ?endOfLine:Array<String>):Array<Record>
     {
         var p = new Utf8Reader(separator, escape, endOfLine);
         p.buffer = text;

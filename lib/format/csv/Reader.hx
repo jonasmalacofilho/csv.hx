@@ -1,7 +1,6 @@
 package format.csv;
 
 import format.csv.Data;
-import haxe.EitherType;
 import haxe.io.*;
 
 /*
@@ -262,30 +261,25 @@ class Reader {
 
        Optional parameters:
 
-        - `separator`: 1-char separator string
-        - `escape`: 1-char escape (or "quoting") string
-        - `endOfLine`: end-of-line sequence string
+        - `separator`: 1-char separator string (default: ASCII comma)
+        - `escape`: 1-char escape string (default: ASCII double quote)
+        - `endOfLine`: allowed end-of-line sequences (default: CRLF or LF)
     */
-    public function new(?separator=",", ?escape="\"", ?endOfLine:EitherType<Array<String>,String>="\n")
+    public function new(?separator, ?escape, ?endOfLine:Array<String>)
     {
 
-        if (stringLength(separator) != 1)
-            throw 'Separator string "$separator" not allowed, only single char';
-        sep = separator;
+        sep = separator != null ? separator : ",";
+        if (stringLength(sep) != 1)
+            throw 'Separator string "$sep" not allowed, only single char';
 
-        if (stringLength(escape) != 1)
-            throw 'Escape string "$escape" not allowed, only single char';
-        esc = escape;
+        esc = escape != null ? escape : "\"";
+        if (stringLength(esc) != 1)
+            throw 'Escape string "$esc" not allowed, only single char';
 
-        if (endOfLine == null) {
-            eol = ["\r\n", "\n"];
-        }
-        else {
-            eol = Std.is(endOfLine, String) ? [endOfLine] : endOfLine;
-            if (Lambda.has(eol, null) || Lambda.has(eol, ""))
-                throw "EOL sequences can't be empty";
-            eol.sort(function (a,b) return stringLength(b) - stringLength(a));
-        }
+        eol = endOfLine != null ? endOfLine : ["\r\n", "\n"];
+        if (Lambda.has(eol, null) || Lambda.has(eol, ""))
+            throw "EOL sequences can't be empty";
+        eol.sort(function (a,b) return stringLength(b) - stringLength(a));
         eolsize = eol.map(stringLength);
 
         reset(buffer, null);
@@ -294,7 +288,7 @@ class Reader {
     /*
        Read and return all records in `text`.
     */
-    public static function read(text:String, ?separator=",", ?escape="\"", ?endOfLine:EitherType<Array<String>,String>="\n"):Array<Record>
+    public static function read(text:String, ?separator, ?escape, ?endOfLine:Array<String>):Array<Record>
     {
         var p = new Reader(separator, escape, endOfLine);
         p.buffer = text;

@@ -4,9 +4,9 @@
     "license"      :  "BSD",
     "tags"         :  ["cross"],
     "description"  :  "A CSV format library for Haxe",
-    "version"      :  "0.1.0",
+    "version"      :  "0.2.0",
     "classPath"    :  "lib",
-    "releasenote"  :  "Cross-platform streaming reader with support for UTF-8 and variable control strings",
+    "releasenote"  :  "Optional constructor parameters and multiple allowed EOL sequences",
     "contributors" :  ["jonasmalacofilho", "elebeta"],
     "dependencies" :  {}
 }
