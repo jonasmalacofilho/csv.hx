@@ -36,10 +36,10 @@ class Reader {
 
     var sep:String;
     var esc:String;
-    var eol:String;
+    var eol:Array<String>;
     var inp:Null<Input>;
 
-    var eolsize:Int;  // cached eol size, computed with stringLength
+    var eolsize:Array<Int>;  // cached eol sizes, computed with stringLength
     var starting:Bool;
     var buffer:String;
     var pos:Int;
@@ -99,9 +99,14 @@ class Reader {
         }
 
         while (skip-- >= 0) {
-            token = get(p, eolsize) == eol ? eol : get(p, 1);
+            token = get(p, 1);
             if (token == null)
                 break;
+            for (i in 0...eol.length) {
+                var t = get(p, eolsize[i]);
+                if (t == eol[i])
+                    token = t;
+            }
             p += stringLength(token);
             if (cachedToken == null) {
                 cachedToken = token;
@@ -124,7 +129,7 @@ class Reader {
     function readSafeChar()
     {
         var cur = peekToken();
-        if (cur == sep || cur == esc || cur == eol)
+        if (cur == sep || cur == esc || Lambda.has(eol, cur))
             return null;
         return nextToken();
     }
@@ -217,7 +222,7 @@ class Reader {
         var r = [];
         r.push(readRecord());
         var nl = nextToken();
-        while (nl == eol) {
+        while (Lambda.has(eol, nl)) {
             if (peekToken() != null)
                 r.push(readRecord());  // don't append an empty record for eol terminating string
             nl = nextToken();
@@ -236,7 +241,7 @@ class Reader {
     {
         if (!starting) {
             var nl = nextToken();
-            if (nl != eol)
+            if (!Lambda.has(eol, nl))
                 throw 'Unexpected "${peekToken()}" after record';
         }
         return readRecord();
@@ -260,6 +265,7 @@ class Reader {
     */
     public function new(?separator=",", ?escape="\"", ?endOfLine="\n")
     {
+
         if (stringLength(separator) != 1)
             throw 'Separator string "$separator" not allowed, only single char';
         if (stringLength(escape) != 1)
@@ -269,8 +275,9 @@ class Reader {
 
         sep = separator;
         esc = escape;
-        eol = endOfLine;
-        eolsize = stringLength(eol);
+        eol = [endOfLine];
+        eol.sort(function (a,b) return a.length - b.length);
+        eolsize = eol.map(stringLength);
 
         reset(buffer, null);
     }
