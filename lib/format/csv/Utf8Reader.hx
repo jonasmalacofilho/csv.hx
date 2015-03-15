@@ -5,11 +5,11 @@ import haxe.Utf8;
 import haxe.io.*;
 
 class Utf8Reader extends Reader {
-    override function substring(str, pos, ?len:Null<Int>)
+    override function substring(str, pos, ?length:Null<Int>)
     {
-        if (len == null)
-            len = Utf8.length(str);
-        return Utf8.sub(str, pos, len);
+        if (length == null)
+            length = Utf8.length(str);
+        return Utf8.sub(str, pos, length);
     }
 
     override function stringLength(str)

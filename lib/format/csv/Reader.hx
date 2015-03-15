@@ -49,9 +49,9 @@ class Reader {
 
     // Used instead of `String.substr`
     // (important for Utf8 support in subclass)
-    function substring(str:String, pos:Int, ?len:Null<Int>):String
+    function substring(str:String, pos:Int, ?length:Null<Int>):String
     {
-        return str.substr(pos, len);
+        return str.substr(pos, length);
     }
 
     // Used instead of `String.length`
