@@ -43,7 +43,6 @@ class BaseSuite {
         Assert.same(["α","β","γ"], r(u, 'α,β,γ'));
     }
 
-#if !flash
     public function test03_UnsafeUtf8RecordReading()
     {
         function r(reader, str)
@@ -64,7 +63,6 @@ class BaseSuite {
         Assert.same(["a","b","c"], r(u, '✍a✍➔b➔c'));
         Assert.same(["α","β","γ"], r(u, 'α➔β➔γ'));
     }
-#end
 
     public function test04_Read()
     {
@@ -126,7 +124,6 @@ class BaseSuite {
         Assert.same(Lambda.list([["a","b","c"], ["d","e","f"]]), Lambda.list(reader));
     }
 
-#if !flash
     public function test06_Streams()
     {
         var n = new Reader(",", "\"", allowedEol);
@@ -154,7 +151,6 @@ class BaseSuite {
         Assert.same([["a","b","c"], ["d","e","f"]], r(u, '612c622c63${heol}642c652c66'));
         Assert.same([["α","β","γ"], ["d","e","f"]], r(u, 'ceb12cceb22cceb3${heol}642c652c66'));
     }
-#end
 }
 
 class Suite01_NixEol extends BaseSuite {
