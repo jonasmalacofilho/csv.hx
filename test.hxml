@@ -1,7 +1,7 @@
 --interp
 -main Test
 -cp test
--cp lib
+-lib csv
 -lib utest
 -D UNIT_TESTING_CSV
 
