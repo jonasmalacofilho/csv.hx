@@ -50,14 +50,14 @@ class BaseSuite {
             return reader.reset(str, null).next();
         }
 
-#if (js || java || cs || swf)
+// #if (js || java || cs || swf)
         // on targets where String already has unicode support, the Utf8Reader
         // shouldn't be necessary
         var n = new Reader("➔", "✍", allowedEol);
         Assert.same(["a","b","c"], r(n, 'a➔b➔c'));
         Assert.same(["a","b","c"], r(n, '✍a✍➔b➔c'));
         Assert.same(["α","β","γ"], r(n, 'α➔β➔γ'));
-#end
+// #end
         var u = new Utf8Reader("➔", "✍", allowedEol);
         Assert.same(["a","b","c"], r(u, 'a➔b➔c'));
         Assert.same(["a","b","c"], r(u, '✍a✍➔b➔c'));
