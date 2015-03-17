@@ -4,5 +4,4 @@
 -lib csv
 -lib utest
 -D UNIT_TESTING_CSV
--debug
 
