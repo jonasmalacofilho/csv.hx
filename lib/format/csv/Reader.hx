@@ -51,6 +51,10 @@ class Reader {
     // (important for Utf8 support in subclass)
     function substring(str:String, pos:Int, ?length:Null<Int>):String
     {
+#if flash
+        if (length == null)
+            length = str.length;
+#end
         return str.substr(pos, length);
     }
 
