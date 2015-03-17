@@ -50,7 +50,7 @@ class BaseSuite {
             return reader.reset(str, null).next();
         }
 
-#if (js || java || cs || python)
+#if (js || java || cs || python || flash)
         // on targets where String already has unicode support, the Utf8Reader
         // shouldn't be necessary
         var n = new Reader("➔", "✍", allowedEol);
@@ -138,18 +138,20 @@ class BaseSuite {
 
         var heol = Bytes.ofString(eol).toHex();
 
-#if !(js || java || cs || python)
-        // string/normal reader
+        // ascii
+        Assert.same([["a","b","c"], ["d","e","f"]], r(n, '612c622c63${heol}642c652c66'));  // a,b,c${eol}d,e,f
+        Assert.same([["a","b","c"], ["d","e","f"]], r(u, '612c622c63${heol}642c652c66'));
+
+        // utf8
+        Assert.same([["α","β","γ"], ["d","e","f"]], r(u, 'ceb12cceb22cceb3${heol}642c652c66'));
+
+        // utf8 with string/normal reader
+#if !(js || java || cs || python || flash)
         // targets where native String has unicode support can't (all) read a
         // Utf8 stream with the native String Reader; invalid Utf8 strings can't
         // be constructed on these targets
-        Assert.same([["a","b","c"], ["d","e","f"]], r(n, '612c622c63${heol}642c652c66'));  // a,b,c${eol}d,e,f
         Assert.same([["α","β","γ"], ["d","e","f"]], r(n, 'ceb12cceb22cceb3${heol}642c652c66')); // α,β,γ${eol}d,e,f
 #end
-
-        // utf8 reader
-        Assert.same([["a","b","c"], ["d","e","f"]], r(u, '612c622c63${heol}642c652c66'));
-        Assert.same([["α","β","γ"], ["d","e","f"]], r(u, 'ceb12cceb22cceb3${heol}642c652c66'));
     }
 }
 
