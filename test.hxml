@@ -1,7 +1,8 @@
---interp
+-neko test.n
 -main Test
 -cp test
 -lib csv
 -lib utest
 -D UNIT_TESTING_CSV
+-cmd neko test.n
 
