@@ -229,13 +229,12 @@ class Reader {
     {
         var r = [];
         var nl;
-        do {
-            if (peekToken() != null)
-                r.push(readRecord());  // don't append empty records at the end of the stream
+        while (peekToken() != null) {
+            r.push(readRecord());
             nl = nextToken();
-        } while (Lambda.has(eol, nl));
-        if (peekToken() != null)
-            throw 'Unexpected "${peekToken()}" after record';
+            if (nl != null && !Lambda.has(eol, nl))
+                throw 'Unexpected "$nl" after record';
+        }
         return r;
     }
 
