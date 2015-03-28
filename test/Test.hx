@@ -73,9 +73,9 @@ class BaseSuite {
         // multiple records
         Assert.same([["a","b","c"], ["d","e","f"]], n('a,b,c${eol}d,e,f'));
         // empty string
-        Assert.same(0, n('').length);
+        Assert.same([], n(''));
         // almost empty string
-        Assert.same(1, n('$eol').length);
+        Assert.same([[""]], n('$eol'));
         // single record with/without eol
         Assert.same([["a","b","c"]], n('a,b,c'));
         Assert.same([["a","b","c"]], n('a,b,c${eol}'));
@@ -86,9 +86,9 @@ class BaseSuite {
         // multiple records
         Assert.same([["a","b","c"], ["d","e","f"]], u('a,b,c${eol}d,e,f'));
         // empty string
-        Assert.equals(0, u('').length);
+        Assert.same([], u(''));
         // almost empty string
-        Assert.same(1, u('$eol').length);
+        Assert.same([[""]], u('$eol'));
         // single record with/without eol
         Assert.same([["a","b","c"]], u('a,b,c'));
         Assert.same([["a","b","c"]], u('a,b,c${eol}'));
@@ -123,11 +123,6 @@ class BaseSuite {
         reader.reset('a${eol}', null);
         Assert.isTrue(reader.hasNext());
         Assert.same(["a"], reader.next());
-        Assert.isFalse(reader.hasNext());
-
-        // `starting` flag updates on other public APIs
-        reader.reset('', null); reader.readRecord(); Assert.isFalse(reader.hasNext());
-        reader.reset('', null); reader.readAll(); Assert.isFalse(reader.hasNext());
 
         // iterator & iterable usage
         reader.reset('a,b,c${eol}d,e,f', null);
@@ -164,6 +159,31 @@ class BaseSuite {
         // be constructed on these targets
         Assert.same([["α","β","γ"], ["d","e","f"]], r(n, 'ceb12cceb22cceb3${heol}642c652c66')); // α,β,γ${eol}d,e,f
 #end
+    }
+
+    public function test07_Exhaustion()
+    {
+        var reader = new Reader(",", "\"", allowedEol);
+
+        reader.reset('', null);
+        Assert.same([], reader.readAll());
+        Assert.isFalse(reader.hasNext());
+        Assert.same([], reader.readAll());
+
+        reader.reset('$eol', null);
+        Assert.same([[""]], reader.readAll());
+        Assert.isFalse(reader.hasNext());
+        Assert.same([], reader.readAll());
+
+        reader.reset('a,b,c', null);
+        Assert.same([["a","b","c"]], reader.readAll());
+        Assert.isFalse(reader.hasNext());
+        Assert.same([], reader.readAll());
+
+        reader.reset('a,b,c$eol', null);
+        Assert.same([["a","b","c"]], reader.readAll());
+        Assert.isFalse(reader.hasNext());
+        Assert.same([], reader.readAll());
     }
 }
 
