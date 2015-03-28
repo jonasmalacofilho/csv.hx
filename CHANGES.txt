@@ -1,0 +1,24 @@
+HEAD
+
+ - [breaking] More reasonable results for "" and "\n": no record and one only
+   record
+ - Iterable API documentation
+ - More testes of empty strings and input exhaustion
+
+v0.2.0:
+
+ - [breaking] Allow multiple EOL sequences; default to CRLF or LF
+ - Optional constructor parameters
+ - Chainable Reader.reset
+ - Flash workaround for String.substr(_, null) inconsistency
+ - Remove Bytes.getString deprecation warnings before Haxe 3.1.3
+
+v0.1.0:
+
+   Initial release.
+
+ - Streaming reader
+ - Support UTF-8 (via haxe.Utf8)
+ - Parametrized control strings: arbitrary end-of-line sequence and single
+   character escape (quote) and separator
+
