@@ -23,12 +23,13 @@ import haxe.io.*;
         escaped_string       ::=  "" | escaped escaped_string
         field                ::=  esc escaped_string esc | non_escaped_string
         record               ::=  field | field sep record
-        csv                  ::=  record | record eol csv
+        csv                  ::=  "" | record | record eol csv
 
     Notes:
 
-     - The resulting empty record after a terminating end-of-line sequence in a
-       text is automatically striped.
+     - An empty document is parsed as having no records
+     - An empty record that would result from a document terminating
+       end-of-line sequence is automatically striped
      - Token: null | esc | sep | eol | safe
 */
 class Reader {
@@ -40,7 +41,6 @@ class Reader {
     var inp:Null<Input>;
 
     var eolsize:Array<Int>;  // cached eol sizes, computed with stringLength
-    var starting:Bool;
     var buffer:String;
     var pos:Int;
     var bufferOffset:Int;
@@ -195,7 +195,6 @@ class Reader {
 
     function readRecord()
     {
-        starting = false;
         var r = [];
         r.push(readField());
         while (peekToken() == sep) {
@@ -214,7 +213,6 @@ class Reader {
     */
     public function reset(?string:String, ?stream:Input):Reader
     {
-        starting = true;
         buffer = string != null ? string : "";
         inp = stream;
         pos = 0;
@@ -230,13 +228,12 @@ class Reader {
     public function readAll():Csv
     {
         var r = [];
-        r.push(readRecord());
-        var nl = nextToken();
-        while (Lambda.has(eol, nl)) {
+        var nl;
+        do {
             if (peekToken() != null)
-                r.push(readRecord());  // don't append an empty record for eol terminating string
+                r.push(readRecord());  // don't append empty records at the end of the stream
             nl = nextToken();
-        }
+        } while (Lambda.has(eol, nl));
         if (peekToken() != null)
             throw 'Unexpected "${peekToken()}" after record';
         return r;
@@ -244,17 +241,16 @@ class Reader {
 
     public function hasNext()
     {
-        return starting || (peekToken() != null && peekToken(1) != null);
+        return peekToken() != null;
     }
 
     public function next()
     {
-        if (!starting) {
-            var nl = nextToken();
-            if (nl != null && !Lambda.has(eol, nl))
-                throw 'Unexpected "$nl" after record';
-        }
-        return readRecord();
+        var r = readRecord();
+        var nl = nextToken();
+        if (nl != null && !Lambda.has(eol, nl))
+            throw 'Unexpected "$nl" after record';
+        return r;
     }
 
     public function iterator()

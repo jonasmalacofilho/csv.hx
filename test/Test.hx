@@ -73,19 +73,27 @@ class BaseSuite {
         // multiple records
         Assert.same([["a","b","c"], ["d","e","f"]], n('a,b,c${eol}d,e,f'));
         // empty string
-        Assert.same([[""]].toString(), n('').toString());
+        Assert.same(0, n('').length);
+        // almost empty string
+        Assert.same(1, n('$eol').length);
         // single record with/without eol
         Assert.same([["a","b","c"]], n('a,b,c'));
         Assert.same([["a","b","c"]], n('a,b,c${eol}'));
+        // empty fields
+        Assert.same([["","",""],["","",""]], n('"","",""${eol},,'));
 
         // utf8 reader
         // multiple records
         Assert.same([["a","b","c"], ["d","e","f"]], u('a,b,c${eol}d,e,f'));
         // empty string
-        Assert.equals([[]].toString(), u('').toString());  // FIXME bug on utest
+        Assert.equals(0, u('').length);
+        // almost empty string
+        Assert.same(1, u('$eol').length);
         // single record with/without eol
         Assert.same([["a","b","c"]], u('a,b,c'));
         Assert.same([["a","b","c"]], u('a,b,c${eol}'));
+        // empty fields
+        Assert.same([["","",""],["","",""]], u('"","",""${eol},,'));
     }
 
     @:access(format.csv.Reader.readRecord)
@@ -103,6 +111,10 @@ class BaseSuite {
 
         // empty string
         reader.reset('', null);
+        Assert.isFalse(reader.hasNext());
+
+        // almost empty string
+        reader.reset('$eol', null);
         Assert.isTrue(reader.hasNext());
         Assert.same([""], reader.next());
         Assert.isFalse(reader.hasNext());
