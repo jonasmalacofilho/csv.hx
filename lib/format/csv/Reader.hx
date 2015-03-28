@@ -238,12 +238,23 @@ class Reader {
         return r;
     }
 
-    public function hasNext()
+    /*
+       Return whether there are more records to read.
+
+       Part of the iterator/iterable interface.
+    */
+    public function hasNext():Bool
     {
         return peekToken() != null;
     }
 
-    public function next()
+    /*
+       Read and return the next record.
+
+       Part of the iterator/iterable interface, its behavior if `hasNext()` is
+       false is not specified.
+    */
+    public function next():Record
     {
         var r = readRecord();
         var nl = nextToken();
@@ -252,7 +263,12 @@ class Reader {
         return r;
     }
 
-    public function iterator()
+    /*
+       Makes itself an iterable, by returning itself (already an iterator).
+
+       Part of the iterator/iterable interface.
+    */
+    public function iterator():Reader
     {
         return this;
     }
