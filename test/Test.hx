@@ -13,9 +13,9 @@ class BaseSuite {
         var csv = "a,b,c\n1,2,3";
         trace("Example 1:");
 
-        trace(Reader.read(csv));       // native strings, default control strings ,"\n
-        trace(Utf8Reader.read(csv));   // ensure proper Utf8 handling (not always necessary)
-        trace(Reader.read(csv, "|"));  // use | for separator
+        trace(Reader.parseCsv(csv));       // native strings, default control strings ,"\n
+        trace(Utf8Reader.parseCsv(csv));   // ensure proper Utf8 handling (not always necessary)
+        trace(Reader.parseCsv(csv, "|"));  // use | for separator
 
 
         var input = new StringInput(csv);
@@ -24,9 +24,9 @@ class BaseSuite {
         // create a reader
         var reader = new Reader();  // optionally specify different separator, escape or EOL strings
 
-        // reset the reader with the stream
-        reader.reset(null, input);  // a string or a combination of both string and input can also be used
-                                    // to reset; the reader will always try to start with the string and
+        // open the reader with the stream
+        reader.open(null, input);  // a string or a combination of both string and input can also be used
+                                    // to open; the reader will always try to open with the string and
                                     // then pass to the stream
 
         // use the iterable interface
@@ -34,7 +34,7 @@ class BaseSuite {
             trace(record);  // do some work, without first having to read the entire stream
 
 
-        reader.reset(null, input = new StringInput(csv));
+        reader.open(null, input = new StringInput(csv));
         trace("Example 2 - b:");
 
         // OR read everything
@@ -48,7 +48,7 @@ class BaseSuite {
         var reader = new Reader(",", "\"", allowedEol);
         function r(str)
         {
-            return reader.reset(str, null).next();
+            return reader.open(str, null).next();
         }
 
         Assert.same(["a","b","c"], r('a,b,c'));
@@ -68,7 +68,7 @@ class BaseSuite {
     {
         function r(reader, str)
         {
-            return reader.reset(str, null).next();
+            return reader.open(str, null).next();
         }
 
         var n = new Reader(",", "\"", allowedEol);
@@ -82,7 +82,7 @@ class BaseSuite {
     {
         function r(reader, str)
         {
-            return reader.reset(str, null).next();
+            return reader.open(str, null).next();
         }
 
 #if (js || java || cs || python || flash)
@@ -101,8 +101,8 @@ class BaseSuite {
 
     public function test04_Read()
     {
-        var n = Reader.read.bind(_, ",", "\"", allowedEol);
-        var u = Utf8Reader.read.bind(_, ",", "\"", allowedEol);
+        var n = Reader.parseCsv.bind(_, ",", "\"", allowedEol);
+        var u = Utf8Reader.parseCsv.bind(_, ",", "\"", allowedEol);
 
         // string/normal reader
         // multiple records
@@ -137,7 +137,7 @@ class BaseSuite {
         var reader = new Reader(",", "\"", allowedEol);
 
         // step by step
-        reader.reset('a,b,c${eol}d,e,f', null);
+        reader.open('a,b,c${eol}d,e,f', null);
         Assert.isTrue(reader.hasNext());
         Assert.same(["a","b","c"], reader.next());
         Assert.isTrue(reader.hasNext());
@@ -145,24 +145,24 @@ class BaseSuite {
         Assert.isFalse(reader.hasNext());
 
         // empty string
-        reader.reset('', null);
+        reader.open('', null);
         Assert.isFalse(reader.hasNext());
 
         // almost empty string
-        reader.reset('$eol', null);
+        reader.open('$eol', null);
         Assert.isTrue(reader.hasNext());
         Assert.same([""], reader.next());
         Assert.isFalse(reader.hasNext());
 
         // newline terminated document
-        reader.reset('a${eol}', null);
+        reader.open('a${eol}', null);
         Assert.isTrue(reader.hasNext());
         Assert.same(["a"], reader.next());
 
         // iterator & iterable usage
-        reader.reset('a,b,c${eol}d,e,f', null);
+        reader.open('a,b,c${eol}d,e,f', null);
         Assert.same([["a","b","c"], ["d","e","f"]], [for (record in reader) record]);
-        reader.reset('a,b,c${eol}d,e,f', null);
+        reader.open('a,b,c${eol}d,e,f', null);
         Assert.same(Lambda.list([["a","b","c"], ["d","e","f"]]), Lambda.list(reader));
     }
 
@@ -175,7 +175,7 @@ class BaseSuite {
         {
             var d = new BaseCode(Bytes.ofString("0123456789abcdef"));
             var i = new BytesInput(d.decodeBytes(Bytes.ofString(hex)));
-            return reader.reset(null, i).readAll();
+            return reader.open(null, i).readAll();
         }
 
         var heol = Bytes.ofString(eol).toHex();
@@ -200,22 +200,22 @@ class BaseSuite {
     {
         var reader = new Reader(",", "\"", allowedEol);
 
-        reader.reset('', null);
+        reader.open('', null);
         Assert.same([], reader.readAll());
         Assert.isFalse(reader.hasNext());
         Assert.same([], reader.readAll());
 
-        reader.reset('$eol', null);
+        reader.open('$eol', null);
         Assert.same([[""]], reader.readAll());
         Assert.isFalse(reader.hasNext());
         Assert.same([], reader.readAll());
 
-        reader.reset('a,b,c', null);
+        reader.open('a,b,c', null);
         Assert.same([["a","b","c"]], reader.readAll());
         Assert.isFalse(reader.hasNext());
         Assert.same([], reader.readAll());
 
-        reader.reset('a,b,c$eol', null);
+        reader.open('a,b,c$eol', null);
         Assert.same([["a","b","c"]], reader.readAll());
         Assert.isFalse(reader.hasNext());
         Assert.same([], reader.readAll());

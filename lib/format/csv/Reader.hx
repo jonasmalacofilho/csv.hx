@@ -205,13 +205,13 @@ class Reader {
     }
 
     /*
-       Reset the reader in-place with some input data and return it.
+       Start or reset the reader in-place with some input data and return it.
 
        Data can be provided in a string or in a stream.  If both are supplied,
        the reader will first process the entire string, switching automatically
        to the stream when there's no new data left on the string.
     */
-    public function reset(?string:String, ?stream:Input):Reader
+    public function open(?string:String, ?stream:Input):Reader
     {
         buffer = string != null ? string : "";
         inp = stream;
@@ -220,6 +220,21 @@ class Reader {
         cachedToken = null;
         cachedPos = 0;
         return this;
+    }
+
+    /*
+       Start or reset the reader in-place with some input data and return it.
+
+       Deprecated: use `open(?string, ?stream)` instead.
+
+       Data can be provided in a string or in a stream.  If both are supplied,
+       the reader will first process the entire string, switching automatically
+       to the stream when there's no new data left on the string.
+    */
+    @:deprecated("reset(?string, ?stream) has been deprecated; use open(?string, ?stream) instead")
+    public inline function reset(?string:String, ?stream:Input):Reader
+    {
+        return open(string, stream);
     }
 
     /*
@@ -301,17 +316,28 @@ class Reader {
         eol.sort(function (a,b) return stringLength(b) - stringLength(a));
         eolsize = eol.map(stringLength);
 
-        reset(buffer, null);
+        open(null, null);
     }
 
     /*
-       Read and return all records in `text`.
+       Read and return an array with all records in `text`.
     */
-    public static function read(text:String, ?separator, ?escape, ?endOfLine:Array<String>):Array<Record>
+    public static function parseCsv(text:String, ?separator, ?escape, ?endOfLine:Array<String>):Array<Record>
     {
         var p = new Reader(separator, escape, endOfLine);
         p.buffer = text;
         return p.readAll();
+    }
+
+    /*
+       Read and return an array with all records in `text`.
+
+       Deprecated: use `parseCsv(text, ...)` instead.
+    */
+    @:deprecated("read(text, ...) has been deprecated; use parseCsv(text, ...) instead")
+    public static inline function read(text:String, ?separator, ?escape, ?endOfLine:Array<String>):Array<Record>
+    {
+        return parseCsv(text, separator, escape, endOfLine);
     }
 }
 

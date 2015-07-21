@@ -21,9 +21,9 @@ import format.csv.*;
 
 var csv:String;  // some data in CSV
 
-trace(Reader.read(csv));       // native strings, default control strings ,"\n
-trace(Utf8Reader.read(csv));   // ensure proper Utf8 handling (not always necessary)
-trace(Reader.read(csv, "|"));  // use | for separator
+trace(Reader.parseCsv(csv));       // native strings, default control strings ,"\n
+trace(Utf8Reader.parseCsv(csv));   // ensure proper Utf8 handling (not always necessary)
+trace(Reader.parseCsv(csv, "|"));  // use | for separator
 ```
 
 Streams (`haxe.io.Input`):
@@ -37,8 +37,8 @@ var input:haxe.io.Input;    // CSV data in a File, Socket or other Input subclas
 // create a reader
 var reader = new Reader();  // optionally specify different separator, escape or EOL strings
 
-// reset the reader with the stream
-reader.reset(null, input);  // a string or a combination of both string and input can also be used
+// open the stream
+reader.open(null, input);  // a string or a combination of both string and input can also be used
                             // to reset; the reader will always try to start with the string and
                             // then pass to the stream
 

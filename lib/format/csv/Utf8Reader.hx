@@ -95,13 +95,24 @@ class Utf8Reader extends Reader {
     }
 
     /*
-       Read and return all records in `text`.
+       Read and return an array with all records in `text`.
     */
-    public static function read(text:String, ?separator, ?escape, ?endOfLine:Array<String>):Array<Record>
+    public static function parseCsv(text:String, ?separator, ?escape, ?endOfLine:Array<String>):Array<Record>
     {
         var p = new Utf8Reader(separator, escape, endOfLine);
         p.buffer = text;
         return p.readAll();
+    }
+
+    /*
+       Read and return an array with all records in `text`.
+
+       Deprecated: use `parseCsv(text, ...)` instead.
+    */
+    @:deprecated("read(text, ...) has been deprecated; use parseCsv(text, ...) instead")
+    public static inline function read(text:String, ?separator, ?escape, ?endOfLine:Array<String>):Array<Record>
+    {
+        return parseCsv(text, separator, escape, endOfLine);
     }
 }
 
