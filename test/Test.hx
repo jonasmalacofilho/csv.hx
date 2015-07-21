@@ -3,6 +3,7 @@ import haxe.crypto.BaseCode;
 import haxe.io.*;
 import utest.*;
 import utest.ui.Report;
+using format.csv.Reader;
 
 class BaseSuite {
     var allowedEol:Array<String>;
@@ -39,6 +40,12 @@ class BaseSuite {
 
         // OR read everything
         trace(reader.readAll());
+
+        var csv = "a,b,c\n1,2,3";
+        trace("Example 3:");
+
+        trace(csv.parseCsv());       // native strings, default control strings ,"\n
+        trace(csv.parseCsv("|"));    // use | for separator
 
         Assert.isTrue(true);
     }
