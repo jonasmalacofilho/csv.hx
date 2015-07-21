@@ -12,15 +12,15 @@ class BaseSuite {
     public function test00_Examples()
     {
         var csv = "a,b,c\n1,2,3";
-        trace("Example 1:");
 
+        trace("Example 1:");
         trace(Reader.parseCsv(csv));       // native strings, default control strings ,"\n
         trace(Utf8Reader.parseCsv(csv));   // ensure proper Utf8 handling (not always necessary)
         trace(Reader.parseCsv(csv, "|"));  // use | for separator
 
 
-        var input = new StringInput(csv);
         trace("Example 2 - a:");
+        var input = new StringInput(csv);
 
         // create a reader
         var reader = new Reader();  // optionally specify different separator, escape or EOL strings
@@ -35,15 +35,14 @@ class BaseSuite {
             trace(record);  // do some work, without first having to read the entire stream
 
 
-        reader.open(null, input = new StringInput(csv));
         trace("Example 2 - b:");
+        reader.open(null, input = new StringInput(csv));
 
         // OR read everything
         trace(reader.readAll());
 
-        var csv = "a,b,c\n1,2,3";
-        trace("Example 3:");
 
+        trace("Example 3 - a:");
         trace(csv.parseCsv());       // native strings, default control strings ,"\n
         trace(csv.parseCsv("|"));    // use | for separator
 
