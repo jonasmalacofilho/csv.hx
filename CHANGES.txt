@@ -4,6 +4,8 @@ HEAD
    record
  - Iterable API documentation
  - More testes of empty strings and input exhaustion
+ - Better API names for `read` and `reset` (`parseCsv` and `open`)
+ - Static extension suited readCsv : Input -> [...] -> Reader
 
 v0.2.0:
 
