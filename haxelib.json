@@ -2,7 +2,7 @@
     "name"         :  "csv",
     "url"          :  "https://github.com/jonasmalacofilho/csv.hx",
     "license"      :  "BSD",
-    "tags"         :  ["cross"],
+    "tags"         :  ["cross", "parser"],
     "description"  :  "A CSV format library for Haxe",
     "version"      :  "0.4.0",
     "classPath"    :  "lib",
