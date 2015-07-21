@@ -1,11 +1,14 @@
-HEAD
+HEAD: (v0.4.0 to be)
+
+ - Better API names for `read` and `reset` (`parseCsv` and `open`)
+ - Static extension suited readCsv : Input -> [...] -> Reader
+
+v0.3.0-alpha: (not released)
 
  - [breaking] More reasonable results for "" and "\n": no record and one only
    record
  - Iterable API documentation
  - More testes of empty strings and input exhaustion
- - Better API names for `read` and `reset` (`parseCsv` and `open`)
- - Static extension suited readCsv : Input -> [...] -> Reader
 
 v0.2.0:
 
