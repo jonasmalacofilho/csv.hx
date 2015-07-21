@@ -8,6 +8,41 @@ class BaseSuite {
     var allowedEol:Array<String>;
     var eol:String;
 
+    public function test00_Examples()
+    {
+        var csv = "a,b,c\n1,2,3";
+        trace("Example 1:");
+
+        trace(Reader.read(csv));       // native strings, default control strings ,"\n
+        trace(Utf8Reader.read(csv));   // ensure proper Utf8 handling (not always necessary)
+        trace(Reader.read(csv, "|"));  // use | for separator
+
+
+        var input = new StringInput(csv);
+        trace("Example 2 - a:");
+
+        // create a reader
+        var reader = new Reader();  // optionally specify different separator, escape or EOL strings
+
+        // reset the reader with the stream
+        reader.reset(null, input);  // a string or a combination of both string and input can also be used
+                                    // to reset; the reader will always try to start with the string and
+                                    // then pass to the stream
+
+        // use the iterable interface
+        for (record in reader)
+            trace(record);  // do some work, without first having to read the entire stream
+
+
+        reader.reset(null, input = new StringInput(csv));
+        trace("Example 2 - b:");
+
+        // OR read everything
+        trace(reader.readAll());
+
+        Assert.isTrue(true);
+    }
+
     public function test01_NormalRecordReading()
     {
         var reader = new Reader(",", "\"", allowedEol);
