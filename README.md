@@ -53,10 +53,21 @@ Using as static extensions of `String` and `Input`:
 
 ```haxe
 using format.csv.Reader;  // OR format.csv.Utf8Reader
+[...]
 
 var csv:String;  // some data in CSV
+var input:haxe.io.Input;    // CSV data in a File, Socket or other Input subclass
+
+// statically extending String
 trace(csv.parseCsv());       // native strings, default control strings ,"\n
 trace(csv.parseCsv("|"));    // use | for separator
+
+// statically extending Input
+// use the iterable interface
+for (record in input.readCsv())
+    trace(record);
+// OR read everything
+trace(input.readCsv().readAll());
 ```
 
 

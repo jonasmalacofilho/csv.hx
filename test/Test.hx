@@ -47,6 +47,21 @@ class BaseSuite {
         trace(csv.parseCsv());       // native strings, default control strings ,"\n
         trace(csv.parseCsv("|"));    // use | for separator
 
+
+        trace("Example 3 - b:");
+        var input = new StringInput(csv);
+
+        // use the iterable interface
+        for (record in input.readCsv())
+            trace(record);
+
+
+        trace("Example 3 - c:");
+        var input = new StringInput(csv);
+
+        // OR read everything
+        trace(input.readCsv().readAll());
+
         Assert.isTrue(true);
     }
 

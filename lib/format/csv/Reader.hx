@@ -321,6 +321,20 @@ class Reader {
 
     /*
        Read and return an array with all records in `text`.
+
+       Tip: use this to statically extend Input
+    */
+    public static function readCsv(stream:Input, ?separator, ?escape, ?endOfLine:Array<String>):Reader
+    {
+        var p = new Reader(separator, escape, endOfLine);
+        p.inp = stream;
+        return p;
+    }
+
+    /*
+       Read and return an array with all records in `text`.
+
+       Tip: use this to statically extend String
     */
     public static function parseCsv(text:String, ?separator, ?escape, ?endOfLine:Array<String>):Array<Record>
     {
