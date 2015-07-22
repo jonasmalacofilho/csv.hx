@@ -1,12 +1,13 @@
-# example travis.yml haxe configuration
-language: c # change this to objective-c to test on a mac machine
+language: c
+
+sudo: required
 
 env:
   matrix:
     # basic tests
     - TARGET=interp
     # haxe releases
-    # - TARGET=interp HAXE_VER=3.2.0
+    - TARGET=neko HAXE_VER=3.2.0
     - TARGET=neko HAXE_VER=3.1.3
     - TARGET=neko HAXE_VER=v3.1.0
     # haxe targets
@@ -23,14 +24,13 @@ env:
 matrix:
   fast_finish: true
   allow_failures:
-    # - env: TARGET=neko HAXE_VER=3.1.3
     # - env: TARGET=neko HAXE_VER=v3.1.0
     - env: TARGET=cpp ARCH=i686
 
-before_install: # clone travis-hx repo
+before_install:
   - travis_retry git clone --depth=50 --branch=master git://github.com/jonasmalacofilho/travis-hx.git ~/travis-hx
 
-install: # setup the target
+install:
   - ~/travis-hx/setup.sh
   - haxelib install utest
 
