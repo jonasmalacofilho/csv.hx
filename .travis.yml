@@ -32,11 +32,12 @@ before_install:
 install:
   - ~/travis-hx/setup.sh
   - haxelib install utest
+  - haxelib dev csv $PWD
 
 script:
   - cd $TRAVIS_BUILD_DIR
   # build the target. This will call haxe with the HXFLAGS and HXFLAGS_EXTRA environment variables
-  - HXFLAGS="-main Test -cp test -cp lib -lib utest -D UNIT_TESTING_CSV -D travis" ~/travis-hx/build.sh
+  - HXFLAGS="-main Test -cp test -lib csv -lib utest -D UNIT_TESTING_CSV -D travis" ~/travis-hx/build.sh
   # run the tests
   - ~/travis-hx/runtests.sh $FILENAME # this will set the $FILENAME defined on the environment variable to run the tests
 
