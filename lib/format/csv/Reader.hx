@@ -136,10 +136,18 @@ class Reader {
         return ret;
     }
 
+    function isEol(char)
+    {
+        for (i in 0...eol.length)
+            if (eol[i] == char)
+                return true;
+        return false;
+    }
+
     function readSafeChar()
     {
         var cur = peekToken();
-        if (cur == sep || cur == esc || Lambda.has(eol, cur))
+        if (cur == sep || cur == esc || isEol(cur))
             return null;
         return nextToken();
     }
@@ -247,7 +255,7 @@ class Reader {
         while (peekToken() != null) {
             r.push(readRecord());
             nl = nextToken();
-            if (nl != null && !Lambda.has(eol, nl))
+            if (nl != null && !isEol(nl))
                 throw 'Unexpected "$nl" after record';
         }
         return r;
@@ -273,7 +281,7 @@ class Reader {
     {
         var r = readRecord();
         var nl = nextToken();
-        if (nl != null && !Lambda.has(eol, nl))
+        if (nl != null && !isEol(nl))
             throw 'Unexpected "$nl" after record';
         return r;
     }
@@ -311,7 +319,7 @@ class Reader {
             throw 'Escape string "$esc" not allowed, only single char';
 
         eol = endOfLine != null ? endOfLine : ["\r\n", "\n"];
-        if (Lambda.has(eol, null) || Lambda.has(eol, ""))
+        if (isEol(null) || isEol(""))
             throw "EOL sequences can't be empty";
         eol.sort(function (a,b) return stringLength(b) - stringLength(a));
         eolsize = eol.map(stringLength);
